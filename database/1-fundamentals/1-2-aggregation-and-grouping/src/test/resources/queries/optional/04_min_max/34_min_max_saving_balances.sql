@@ -1,0 +1,1 @@
+-- 34: Find the minimum and maximum balances for savings accounts with balances over $5,000

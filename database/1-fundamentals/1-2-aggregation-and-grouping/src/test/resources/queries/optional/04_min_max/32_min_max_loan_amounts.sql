@@ -1,0 +1,1 @@
+-- 32: Find the lowest and highest loan amounts for active loans only

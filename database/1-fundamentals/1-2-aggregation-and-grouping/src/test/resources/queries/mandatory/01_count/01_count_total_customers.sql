@@ -1,0 +1,1 @@
+-- 1. Count the total number of customers.

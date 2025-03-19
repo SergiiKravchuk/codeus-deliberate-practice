@@ -1,0 +1,1 @@
+-- 29. Finds the average balance for accounts that have more than 2000 in them.

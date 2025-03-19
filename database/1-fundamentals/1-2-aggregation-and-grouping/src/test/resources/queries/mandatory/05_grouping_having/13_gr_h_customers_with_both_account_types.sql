@@ -1,0 +1,1 @@
+-- 13. Find customers who have both a checking and a savings account.

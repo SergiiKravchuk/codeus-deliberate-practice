@@ -1,0 +1,1 @@
+-- 2. Count the number of accounts for each account type.

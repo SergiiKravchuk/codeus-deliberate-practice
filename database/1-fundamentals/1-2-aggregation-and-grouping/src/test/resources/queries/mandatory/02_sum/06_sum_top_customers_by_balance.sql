@@ -1,0 +1,1 @@
+-- 6. Find the top 3 customers with the highest total balance.

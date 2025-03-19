@@ -1,0 +1,1 @@
+-- 43. Find branches where at least one employee has a salary greater than $50,000.

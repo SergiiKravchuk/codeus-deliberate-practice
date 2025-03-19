@@ -1,0 +1,1 @@
+-- 38. Find branches where total employee salaries exceed $100,000.
