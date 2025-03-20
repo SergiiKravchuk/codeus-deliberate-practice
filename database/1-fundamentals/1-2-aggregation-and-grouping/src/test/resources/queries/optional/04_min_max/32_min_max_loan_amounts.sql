@@ -1,1 +1,1 @@
--- 32: Find the lowest and highest loan amounts for active loans only
+-- 32: Find the lowest and highest loan amounts for active loans with customer IDs in the range of 5 to 10
