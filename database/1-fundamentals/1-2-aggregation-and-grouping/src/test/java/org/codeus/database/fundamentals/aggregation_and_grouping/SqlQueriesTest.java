@@ -1644,30 +1644,73 @@ public class SqlQueriesTest {
 
     private List<Map<String, Object>> executeQueryFromFile(String queryFileName) throws IOException, SQLException {
         String filePath = getResourcePath(QUERIES_DIR + queryFileName);
-        String sql = Files.readString(Paths.get(filePath));
+        String sql = Files.readString(Paths.get(filePath)).trim();
+
+        System.out.printf("Executing query:%n%s%n%n", sql);
 
         List<Map<String, Object>> results = new ArrayList<>();
 
         try (Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery(sql)) {
-
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();
+
+            List<String> columnNames = new ArrayList<>();
+            int[] columnWidths = new int[columnCount];
+
+            for (int i = 1; i <= columnCount; i++) {
+                String name = metaData.getColumnLabel(i);
+                columnNames.add(name);
+                columnWidths[i - 1] = name.length();
+            }
 
             while (resultSet.next()) {
                 Map<String, Object> row = new HashMap<>();
 
                 for (int i = 1; i <= columnCount; i++) {
-                    String columnName = metaData.getColumnLabel(i);
+                    String columnName = columnNames.get(i - 1);
                     Object value = resultSet.getObject(i);
+                    String valueStr = value == null ? "NULL" : value.toString();
+                    columnWidths[i - 1] = Math.max(columnWidths[i - 1], valueStr.length());
                     row.put(columnName, value);
                 }
 
                 results.add(row);
             }
+
+            printRow(columnNames, columnWidths);
+            printSeparator(columnWidths);
+
+            for (Map<String, Object> row : results) {
+                List<String> values = new ArrayList<>();
+                for (String col : columnNames) {
+                    Object value = row.get(col);
+                    values.add(value == null ? "NULL" : value.toString());
+                }
+                printRow(values, columnWidths);
+            }
+
+            System.out.println();
         }
 
         return results;
     }
+
+    private void printRow(List<String> values, int[] widths) {
+        StringBuilder sb = new StringBuilder("|");
+        for (int i = 0; i < values.size(); i++) {
+            sb.append(" ").append(String.format("%-" + widths[i] + "s", values.get(i))).append(" |");
+        }
+        System.out.println(sb);
+    }
+
+    private void printSeparator(int[] widths) {
+        StringBuilder sb = new StringBuilder("|");
+        for (int width : widths) {
+            sb.append("-".repeat(width + 2)).append("|");
+        }
+        System.out.println(sb);
+    }
+
 
     private static void checkSameAmountOfFieldsInAllRecords(List<Map<String, Object>> returnedEntities) {
         // Check that all records have the same number of fields
