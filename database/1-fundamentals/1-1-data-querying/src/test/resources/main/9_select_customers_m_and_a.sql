@@ -1,0 +1,1 @@
+--Find customers whose names begin with the letter 'M' (case-insensitive) and also contain the letter 'а' (case-insensitive) anywhere in their name.

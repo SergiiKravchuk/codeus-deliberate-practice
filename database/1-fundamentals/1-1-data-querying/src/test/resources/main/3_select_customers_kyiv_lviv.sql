@@ -1,0 +1,1 @@
+--Retrieve a list of all customers who live in either 'Kyiv' or 'Lviv', showing their names

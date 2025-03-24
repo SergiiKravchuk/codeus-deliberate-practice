@@ -1,0 +1,1 @@
+--Retrieve all transactions with an amount greater than $10,000, sorted chronologically by transaction date.

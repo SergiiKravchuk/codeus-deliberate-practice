@@ -1,0 +1,1 @@
+--Find transactions where `transaction_type` starts with 'deposit' (case-insensitive).

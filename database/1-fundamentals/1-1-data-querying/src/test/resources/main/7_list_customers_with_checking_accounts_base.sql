@@ -1,0 +1,1 @@
+--Retrieve a list of all customers who have at least one checking account.

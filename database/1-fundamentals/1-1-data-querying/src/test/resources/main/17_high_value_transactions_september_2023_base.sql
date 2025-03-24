@@ -1,0 +1,1 @@
+--Retrieve all transactions that occurred in September 2023 and have an amount greater than $8,000. Display the transaction date, account number, transaction type, and amount. Order the results by transaction date, then by amount in descending order.

@@ -1,0 +1,1 @@
+--Retrieve a list of customers who do not live in the city 'Kharkiv'.

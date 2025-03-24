@@ -1,0 +1,1 @@
+--Retrieve all accounts, ordering them first by account type ('savings' accounts before 'checking' accounts), and within each account type, sort by balance in descending order.

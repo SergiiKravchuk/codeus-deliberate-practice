@@ -1,18 +1,12 @@
 package org.codeus.database.example;
 
+import org.codeus.database.common.EmbeddedPostgreSqlSetup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +21,7 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
   @Test
   void testProjectSummary() throws IOException, SQLException {
     // Execute the query
-    List<Map<String, Object>> results = executeQueryFromFile("project_summary.sql");
+    List<Map<String, Object>> results = executeQueryFromFile(QUERIES_DIR + "project_summary.sql");
 
     // Verify results
     assertEquals(5, results.size(), "Should have 5 projects");
@@ -55,7 +49,7 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
   @Test
   void testDepartmentSalaryStats() throws IOException, SQLException {
     // Execute the query
-    List<Map<String, Object>> results = executeQueryFromFile("department_salary_stats.sql");
+    List<Map<String, Object>> results = executeQueryFromFile(QUERIES_DIR + "department_salary_stats.sql");
 
     // Verify results
     assertEquals(4, results.size(), "Should have stats for 4 departments");
@@ -85,34 +79,6 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
   })
   void testQuerySyntax(String queryFile) throws IOException {
     // This test just ensures the query can be executed without syntax errors
-    assertDoesNotThrow(() -> executeQueryFromFile(queryFile));
-  }
-
-  private List<Map<String, Object>> executeQueryFromFile(String queryFileName) throws IOException, SQLException {
-    String filePath = getResourcePath(QUERIES_DIR + queryFileName);
-    String sql = Files.readString(Paths.get(filePath));
-
-    List<Map<String, Object>> results = new ArrayList<>();
-
-    try (Statement statement = connection.createStatement();
-         ResultSet resultSet = statement.executeQuery(sql)) {
-
-      ResultSetMetaData metaData = resultSet.getMetaData();
-      int columnCount = metaData.getColumnCount();
-
-      while (resultSet.next()) {
-        Map<String, Object> row = new HashMap<>();
-
-        for (int i = 1; i <= columnCount; i++) {
-          String columnName = metaData.getColumnLabel(i);
-          Object value = resultSet.getObject(i);
-          row.put(columnName, value);
-        }
-
-        results.add(row);
-      }
-    }
-
-    return results;
+    assertDoesNotThrow(() -> executeQueryFromFile(QUERIES_DIR + queryFile));
   }
 }
