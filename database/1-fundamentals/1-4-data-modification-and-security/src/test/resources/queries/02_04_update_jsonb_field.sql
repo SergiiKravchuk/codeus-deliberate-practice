@@ -1,0 +1,3 @@
+-- check the schema for challenges table in 'resources/schema.sql'
+-- update only the one field in the challenge task jsonb column
+-- set days amount to 10

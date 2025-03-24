@@ -1,0 +1,2 @@
+-- check the schema for customers table in 'resources/schema.sql'
+-- insert three customers using only one INSERT statement
