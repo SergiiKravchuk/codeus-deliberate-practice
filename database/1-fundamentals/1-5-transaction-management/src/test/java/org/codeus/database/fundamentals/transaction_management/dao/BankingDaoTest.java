@@ -1,6 +1,7 @@
 package org.codeus.database.fundamentals.transaction_management.dao;
 
 import lombok.SneakyThrows;
+import org.codeus.database.common.EmbeddedPostgreSqlSetup;
 import org.codeus.database.fundamentals.transaction_management.error.CustomerNotFoundException;
 import org.codeus.database.fundamentals.transaction_management.error.DaoOperationException;
 import org.codeus.database.fundamentals.transaction_management.model.Account;
