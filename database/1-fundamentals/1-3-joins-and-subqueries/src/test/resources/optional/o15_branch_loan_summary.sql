@@ -1,0 +1,14 @@
+--Task: Generate Branch Loan Performance Report
+--
+--Create a query to analyze loan distribution across branches using CTEs.
+--Requirements:
+--- Display branch name
+--- Calculate total number of loans per branch
+--- Count approved loans separately
+--- Calculate average loan amount
+--- Include branches with no loans
+--- Round average loan amount to 2 decimal places
+--- Sort by total loans in descending order
+--- Use CTE for intermediate calculations
+--
+--Expected columns: branch_name, total_loans, approved_loans, average_loan_amount

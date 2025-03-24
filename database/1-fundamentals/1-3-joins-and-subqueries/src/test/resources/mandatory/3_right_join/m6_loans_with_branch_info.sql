@@ -1,0 +1,8 @@
+--Task: Display All Loans with Branch Information
+--Requirements:
+--- Show all loans
+--- Include branch details where loan was issued
+--- Display loan amount and branch name
+--- Basic RIGHT JOIN example
+--
+--Expected columns: loan_type, amount, branch_name

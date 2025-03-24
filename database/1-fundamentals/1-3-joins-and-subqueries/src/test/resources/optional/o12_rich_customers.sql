@@ -1,0 +1,12 @@
+--Task: Identify Above-Average Balance Customers
+--
+--Write a query to find customers whose total account balance exceeds the bank's average.
+--Requirements:
+--- Show customer's first and last name
+--- Calculate total balance across all accounts for each customer
+--- Compare against the average balance across ALL accounts
+--- Only include customers whose total balance is above average
+--- Use subquery to determine the average balance
+--- Ensure accurate balance aggregation per customer
+--
+--Expected columns: first_name, last_name, total_balance

@@ -1,0 +1,45 @@
+--Task: Advanced Branch Performance Scoring
+--
+--Write a query to evaluate branch performance using multiple CTEs and efficiency metrics.
+--Requirements:
+--- Use two CTEs: employee_performance and transaction_efficiency
+--- In employee_performance CTE:
+    -- Count unique employees per branch
+    -- Calculate average salary
+    -- Count and sum processed loans
+--- In transaction_efficiency CTE:
+    -- Count unique accounts
+    -- Count total transactions
+    -- Calculate total deposits
+    -- Compute transactions per account ratio
+--- Main query should:
+    -- Display branch name
+    -- Show employee metrics
+    -- Show transaction metrics
+    -- Calculate efficiency ratios:
+--       * Transactions per account (round to 2 decimals)
+--       * Deposits per employee (round to 2 decimals)
+    -- Calculate performance score using weighted formula:
+--       * 30% weight for total deposits
+--       * 30% weight for total loan amount
+--       * 20% weight for transaction count
+--       * 20% weight for processed loans
+    -- Divide final score by 1000 for readability
+--
+--Expected columns:
+--- branch_name
+--- employee_count
+--- processed_loans
+--- avg_employee_salary (rounded to 2 decimals)
+--- account_count
+--- transaction_count
+--- transactions_per_account (rounded to 2 decimals)
+--- deposits_per_employee (rounded to 2 decimals)
+--- performance_score (rounded to 2 decimals)
+--
+--Notes:
+--- Use NULLIF when dividing to prevent division by zero
+--- Use COALESCE to convert NULL to 0 in calculations
+--- Handle edge case where branch has no employees
+--- Round all monetary values to 2 decimal places
+--Sort by performance_score in descending order

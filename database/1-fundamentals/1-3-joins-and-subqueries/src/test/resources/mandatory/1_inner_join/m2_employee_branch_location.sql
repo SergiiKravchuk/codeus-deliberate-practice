@@ -1,0 +1,8 @@
+--Task: List All Employees with Their Branch Location
+--Requirements:
+--- Show employee name and their branch details
+--- Include branch location
+--- Only show active employees with assigned branches
+--- Basic INNER JOIN example
+--
+--Expected columns: first_name, last_name, branch_name, location

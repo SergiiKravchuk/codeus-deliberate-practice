@@ -1,0 +1,12 @@
+--Task: Generate Customer Product Holdings Report
+--
+--Create a query to summarize all banking products held by each customer.
+--Requirements:
+--- Display customer's first and last name
+--- Count unique accounts owned by each customer
+--- Count unique loans taken by each customer
+--- Include all customers even if they don't have any products
+--- Ensure no duplicate counting of accounts or loans
+--- Include customers with zero products
+--
+--Expected columns: first_name, last_name, account_count, loan_count

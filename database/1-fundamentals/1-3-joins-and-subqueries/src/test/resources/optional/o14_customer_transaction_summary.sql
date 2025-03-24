@@ -1,0 +1,14 @@
+--Task: Create Customer Transaction Activity Report
+--
+--Write a query to analyze customer transaction patterns using CTEs.
+--Requirements:
+--- Show customer's first and last name
+--- Calculate total amount of deposits
+--- Calculate total amount of withdrawals
+--- Count total number of transactions
+--- Consider all transaction types ('deposit' and 'withdrawal')
+--- Use appropriate conditional logic for transaction types
+--- Sort results by transaction count in descending order
+--- Use CTE for better query organization
+--
+--Expected columns: first_name, last_name, total_deposits, total_withdrawals, transaction_count

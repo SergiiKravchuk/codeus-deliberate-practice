@@ -1,0 +1,12 @@
+--Task: Identify Branches with Above-Average Transaction Activity
+--
+--Write a query to find branches that handle more transactions than the average.
+--Requirements:
+--- Display branch name and total transaction count
+--- Calculate average transactions per account across all branches
+--- Only include branches with transaction count above this average
+--- Use appropriate joins to connect branches, accounts, and transactions
+--- Use subquery to determine the average transaction count
+--- Consider all transactions for the comparison
+--
+--Expected columns: branch_name, transaction_count

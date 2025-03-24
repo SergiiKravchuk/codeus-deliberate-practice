@@ -1,0 +1,8 @@
+--Task: Show All Transactions with Account Details
+--Requirements:
+--- List all transactions
+--- Include account information
+--- Show transaction amount and type
+--- Basic RIGHT JOIN example
+--
+--Expected columns: account_type, transaction_type, amount

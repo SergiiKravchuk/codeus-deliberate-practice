@@ -1,0 +1,8 @@
+--Task: List Active Branches Using CTE
+--Requirements:
+--- Use CTE to identify active branches (having at least one account)
+--- Show branch name and status
+--- Basic CTE example
+--- Mark branches as 'Active' or 'Inactive'
+--
+--Expected columns: branch_name, status

@@ -1,0 +1,8 @@
+--Task: Show All Branches and Their Employee Count
+--Requirements:
+--- List all branches
+--- Count employees in each branch
+--- Include branches without employees
+--- Basic LEFT JOIN example
+--
+--Expected columns: branch_name, employee_count
