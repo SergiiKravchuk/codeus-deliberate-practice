@@ -1,0 +1,1 @@
+-- 9. Find the average interest rate per loan status.

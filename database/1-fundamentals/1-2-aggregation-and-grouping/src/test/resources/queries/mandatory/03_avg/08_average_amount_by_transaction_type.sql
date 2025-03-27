@@ -1,0 +1,1 @@
+-- 8. Find the average transaction amount per transaction type.

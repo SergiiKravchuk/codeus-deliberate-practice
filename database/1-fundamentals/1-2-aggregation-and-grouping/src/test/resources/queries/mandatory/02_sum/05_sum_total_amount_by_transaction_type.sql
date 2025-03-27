@@ -1,0 +1,1 @@
+-- 5. Find the total amount transacted for each transaction type.

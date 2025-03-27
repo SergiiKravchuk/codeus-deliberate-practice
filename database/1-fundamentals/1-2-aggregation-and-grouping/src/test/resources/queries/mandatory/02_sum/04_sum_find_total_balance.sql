@@ -1,0 +1,1 @@
+-- 4. Find the total balance in all accounts.

@@ -1,0 +1,1 @@
+-- 12: Find the minimum and maximum account balance for checking accounts only

@@ -1,0 +1,1 @@
+-- 23. Find the total salary expenditure per branch.

@@ -1,0 +1,1 @@
+-- 28. Find the average balance per customer.

@@ -1,0 +1,1 @@
+-- 16. Count the number of transactions per transaction type.

@@ -1,0 +1,1 @@
+-- 30: Calculate the average loan term (in months) for closed loans

@@ -1,0 +1,1 @@
+-- 40. Find the average balance of customers who have more than one account.

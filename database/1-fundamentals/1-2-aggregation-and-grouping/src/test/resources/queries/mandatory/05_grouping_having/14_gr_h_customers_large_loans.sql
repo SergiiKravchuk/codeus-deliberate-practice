@@ -1,0 +1,1 @@
+-- 14. Find customers who have taken loans totaling more than $15,000.

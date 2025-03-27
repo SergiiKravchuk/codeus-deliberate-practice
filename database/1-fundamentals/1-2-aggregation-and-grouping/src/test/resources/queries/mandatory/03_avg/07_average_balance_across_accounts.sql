@@ -1,0 +1,1 @@
+-- 7. Find the average balance across all accounts.
