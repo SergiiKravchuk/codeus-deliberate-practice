@@ -1,9 +1,6 @@
 package org.codeus.database.fundamentals.aggregation_and_grouping;
 
-import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.codeus.database.common.EmbeddedPostgreSqlSetup;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -12,19 +9,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,17 +21,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class SqlQueriesTest {
-
-    private static EmbeddedPostgres postgres;
-    private static Connection connection;
+public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
 
     // File paths relative to src/test/resources
-    private static final String SCHEMA_FILE = "schema.sql";
-    private static final String TEST_DATA_FILE = "test-data.sql";
     private static final String QUERIES_DIR = "queries/";
-    private static final String MANDATORY = "mandatory/";
-    private static final String OPTIONAL = "optional/";
+    private static final String MANDATORY = QUERIES_DIR + "mandatory/";
+    private static final String OPTIONAL = QUERIES_DIR + "optional/";
     private static final String COUNT = "01_count/";
     private static final String SUM = "02_sum/";
     private static final String AVG = "03_avg/";
@@ -103,80 +87,6 @@ public class SqlQueriesTest {
     private static final String OPTIONAL_GROUPING_HAVING_43 = OPTIONAL + GROUPING_HAVING + "43_branches_where_max_salary_exceeds.sql";
     private static final String OPTIONAL_GROUPING_HAVING_44 = OPTIONAL + GROUPING_HAVING + "44_customers_loans_no_accounts.sql";
     private static final String OPTIONAL_GROUPING_HAVING_45 = OPTIONAL + GROUPING_HAVING + "45_branches_with_min_employee_percentage.sql";
-
-    @BeforeAll
-    static void startDatabase() throws IOException {
-        System.out.println("Starting embedded PostgreSQL...");
-        postgres = EmbeddedPostgres.start();
-        try {
-            connection = postgres.getPostgresDatabase().getConnection();
-            connection.setAutoCommit(false); // For transaction control
-            System.out.println("PostgreSQL started successfully");
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to get database connection", e);
-        }
-    }
-
-    @AfterAll
-    static void stopDatabase() throws IOException {
-        System.out.println("Stopping embedded PostgreSQL...");
-        if (Objects.nonNull(connection)) {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                System.err.println("Error closing connection: " + e.getMessage());
-            }
-        }
-
-        if (Objects.nonNull(postgres)) {
-            postgres.close();
-            System.out.println("PostgreSQL stopped successfully");
-        }
-    }
-
-    @BeforeEach
-    void setupSchema() throws SQLException, IOException {
-        System.out.println("Setting up database schema and test data...");
-
-        // Start a transaction that will be rolled back after each test
-        connection.setAutoCommit(false);
-
-        // Clear any existing data
-        clearDatabase();
-
-        // Initialize database schema
-        executeSqlFile(getResourcePath(SCHEMA_FILE));
-
-        // Load test data
-        executeSqlFile(getResourcePath(TEST_DATA_FILE));
-
-        System.out.println("Setup complete");
-    }
-
-    private void clearDatabase() throws SQLException {
-        try (Statement statement = connection.createStatement()) {
-            statement.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
-        }
-    }
-
-    private void executeSqlFile(String filePath) throws IOException, SQLException {
-        Path path = Paths.get(filePath);
-        String sql = Files.readString(path);
-
-        try (Statement statement = connection.createStatement()) {
-            // Execute each statement separately
-            for (String query : sql.split(";")) {
-                if (!query.trim().isEmpty()) {
-                    statement.execute(query);
-                }
-            }
-        }
-    }
-
-    private String getResourcePath(String resourceName) {
-        // In a real application, you would use a resource loader
-        return "src/test/resources/" + resourceName;
-    }
 
     @Test
     @Order(1)
@@ -1641,76 +1551,6 @@ public class SqlQueriesTest {
         // This test just ensures the query can be executed without syntax errors
         assertDoesNotThrow(() -> executeQueryFromFile(queryFile));
     }
-
-    private List<Map<String, Object>> executeQueryFromFile(String queryFileName) throws IOException, SQLException {
-        String filePath = getResourcePath(QUERIES_DIR + queryFileName);
-        String sql = Files.readString(Paths.get(filePath)).trim();
-
-        System.out.printf("Executing query:%n%s%n%n", sql);
-
-        List<Map<String, Object>> results = new ArrayList<>();
-
-        try (Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery(sql)) {
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            int columnCount = metaData.getColumnCount();
-
-            List<String> columnNames = new ArrayList<>();
-            int[] columnWidths = new int[columnCount];
-
-            for (int i = 1; i <= columnCount; i++) {
-                String name = metaData.getColumnLabel(i);
-                columnNames.add(name);
-                columnWidths[i - 1] = name.length();
-            }
-
-            while (resultSet.next()) {
-                Map<String, Object> row = new HashMap<>();
-
-                for (int i = 1; i <= columnCount; i++) {
-                    String columnName = columnNames.get(i - 1);
-                    Object value = resultSet.getObject(i);
-                    String valueStr = value == null ? "NULL" : value.toString();
-                    columnWidths[i - 1] = Math.max(columnWidths[i - 1], valueStr.length());
-                    row.put(columnName, value);
-                }
-
-                results.add(row);
-            }
-
-            printRow(columnNames, columnWidths);
-            printSeparator(columnWidths);
-
-            for (Map<String, Object> row : results) {
-                List<String> values = new ArrayList<>();
-                for (String col : columnNames) {
-                    Object value = row.get(col);
-                    values.add(value == null ? "NULL" : value.toString());
-                }
-                printRow(values, columnWidths);
-            }
-
-            System.out.println();
-        }
-
-        return results;
-    }
-
-    private void printRow(List<String> values, int[] widths) {
-        StringBuilder sb = new StringBuilder("|");
-        for (int i = 0; i < values.size(); i++) {
-            sb.append(" ").append(String.format("%-" + widths[i] + "s", values.get(i))).append(" |");
-        }
-        System.out.println(sb);
-    }
-
-    private void printSeparator(int[] widths) {
-        StringBuilder sb = new StringBuilder("|");
-        for (int width : widths) {
-            sb.append("-".repeat(width + 2)).append("|");
-        }
-        System.out.println(sb);
-    }
-
 
     private static void checkSameAmountOfFieldsInAllRecords(List<Map<String, Object>> returnedEntities) {
         // Check that all records have the same number of fields
