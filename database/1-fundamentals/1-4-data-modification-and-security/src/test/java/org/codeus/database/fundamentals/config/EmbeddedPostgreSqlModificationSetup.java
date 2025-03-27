@@ -144,18 +144,7 @@ public abstract class EmbeddedPostgreSqlModificationSetup {
      */
     protected String getSqlRequestFromFilePath(String filePath) throws IOException {
         String fileFullPath = getResourcePath(filePath);
-        String result = Files.readString(Paths.get(fileFullPath)).trim();
-        final String[] lanes = result.split("\r\n");
-        var sb = new StringBuilder();
-        for (String s : lanes) {
-            if (!s.startsWith("--")) {
-                sb.append(s).append("\r\n");
-            }
-        }
-        if (!sb.isEmpty()) {
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        return sb.toString();
+        return Files.readString(Paths.get(fileFullPath)).trim();
     }
 
     protected int executeModificationQuery(String sql) throws SQLException {
