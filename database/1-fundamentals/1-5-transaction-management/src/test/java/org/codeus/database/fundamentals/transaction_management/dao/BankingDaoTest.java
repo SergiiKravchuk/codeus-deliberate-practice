@@ -173,11 +173,9 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
         void withdrawMoney() {
             int accountId = 1;
 
-            // Perform withdrawal
             BigDecimal withdrawalAmount = BigDecimal.valueOf(250, 0);
             instance.withdrawMoney(accountId, withdrawalAmount);
 
-            // Verify account balance is updated
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT balance FROM accounts WHERE account_id = ?")) {
                 statement.setInt(1, accountId);
@@ -187,7 +185,6 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
                 assertEquals(0, BigDecimal.valueOf(750).compareTo(newBalance), "Balance should be reduced by withdrawal amount");
             }
 
-            // Verify transaction record was created
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT COUNT(*) FROM transactions WHERE account_id = ? AND transaction_type = 'withdrawal' AND amount = ?")) {
                 statement.setInt(1, accountId);
@@ -206,7 +203,6 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
         @DisplayName("should throw exception when withdrawing from non-existent account")
         void withdrawMoney_nonExistentAccount() {
             BigDecimal amount = BigDecimal.valueOf(100);
-            // Attempt to withdraw from non-existent account
             assertThrows(AccountNotFoundException.class, () -> instance.withdrawMoney(999, amount));
         }
 
@@ -217,12 +213,10 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
             Account account = getAccountWithInsufficientFunds();
             int accountId = account.getAccountId();
 
-            // Try to withdraw more than available
             BigDecimal withdrawalAmount = BigDecimal.valueOf(100, 0);
             assertThrows(InsufficientFundsException.class,
                     () -> instance.withdrawMoney(accountId, withdrawalAmount));
 
-            // Verify balance remains unchanged
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT balance FROM accounts WHERE account_id = ?")) {
                 statement.setInt(1, accountId);
@@ -255,11 +249,9 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
             Account sourceAccount = selectAccount(1);
             Account destAccount = selectAccount(2);
 
-            // Transfer money
             BigDecimal transferAmount = BigDecimal.valueOf(200, 0);
             instance.transferMoney(sourceAccount.getAccountId(), destAccount.getAccountId(), transferAmount);
 
-            // Verify source account balance
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT balance FROM accounts WHERE account_id = ?")) {
                 statement.setInt(1, sourceAccount.getAccountId());
@@ -268,7 +260,6 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
                 BigDecimal sourceBalance = rs.getBigDecimal("balance");
                 assertEquals(sourceAccount.getBalance().subtract(transferAmount), sourceBalance, "Source balance should be reduced");
 
-                // Verify destination account balance
                 statement.setInt(1, destAccount.getAccountId());
                 rs = statement.executeQuery();
                 assertTrue(rs.next(), "Destination account should exist");
@@ -276,7 +267,6 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
                 assertEquals(destAccount.getBalance().add(transferAmount), destBalance, "Destination balance should be increased");
             }
 
-            // Verify transaction records (should be two - one for each account)
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT COUNT(*) FROM transactions WHERE transaction_type = 'transfer' AND amount = ?")) {
                 statement.setBigDecimal(1, transferAmount);
@@ -310,7 +300,6 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
                 BigDecimal sourceBalance = rs.getBigDecimal("balance");
                 assertEquals(sourceAccount.getBalance(), sourceBalance, "Source balance should remain unchanged");
 
-                // Verify destination account balance
                 statement.setInt(1, destAccount.getAccountId());
                 rs = statement.executeQuery();
                 assertTrue(rs.next(), "Destination account should exist");
@@ -402,11 +391,9 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
             Loan loan = selectLoan(loanId);
             BigDecimal initialLoanAmount = loan.getLoanAmount();
 
-            // Process payment
             BigDecimal paymentAmount = BigDecimal.valueOf(200, 0);
             instance.processLoanPayment(loanId, paymentAmount, "Loan payment");
 
-            // Verify loan balance is updated
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT loan_amount FROM loans WHERE loan_id = ?")) {
                 statement.setInt(1, loanId);
@@ -416,7 +403,6 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
                 assertEquals(0, initialLoanAmount.subtract(newLoanAmount).compareTo(paymentAmount), "Balance should be reduced by payment amount");
             }
 
-            // Verify payment record was created
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT COUNT(*) FROM loan_payments WHERE loan_id = ? AND payment_amount = ?")) {
                 statement.setInt(1, loanId);
@@ -470,11 +456,9 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
             doThrow(SQLException.class)
                     .doCallRealMethod().when(spyConnection).commit();
 
-            // Process payment
             BigDecimal paymentAmount = BigDecimal.valueOf(200, 0);
             instance.processLoanPayment(loanId, paymentAmount, "Loan payment");
 
-            // Verify loan balance is updated
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT loan_amount FROM loans WHERE loan_id = ?")) {
                 statement.setInt(1, loanId);
@@ -484,7 +468,6 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
                 assertEquals(0, initialLoanAmount.subtract(newLoanAmount).compareTo(paymentAmount), "Balance should be reduced by payment amount");
             }
 
-            // Verify payment record was created
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT COUNT(*) FROM loan_payments WHERE loan_id = ? AND payment_amount = ?")) {
                 statement.setInt(1, loanId);
@@ -516,7 +499,6 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
 
             assertDoesNotThrow(() -> instance.processLoanPayment(loanId, paymentAmount, "Loan payment"));
 
-            // Verify loan balance was not updated
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT loan_amount FROM loans WHERE loan_id = ?")) {
                 statement.setInt(1, loanId);
@@ -526,7 +508,6 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
                 assertEquals(0, loan.getLoanAmount().compareTo(loanAmount), "Loan amount should remain unchanged");
             }
 
-            // Verify no payment record was created
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT COUNT(*) FROM loan_payments WHERE loan_id = ? and payment_amount = ?")) {
                 statement.setInt(1, loanId);
@@ -549,7 +530,6 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
             BigDecimal paymentAmount = BigDecimal.valueOf(200, 0);
             instance.processLoanPayment(loanId, paymentAmount, "Loan payment");
 
-            // Verify loan balance was not updated
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT loan_amount FROM loans WHERE loan_id = ?")) {
                 statement.setInt(1, loanId);
@@ -559,7 +539,6 @@ class BankingDaoTest extends EmbeddedPostgreSqlSetup {
                 assertEquals(0, loan.getLoanAmount().compareTo(loanAmount), "Loan amount should remain unchanged");
             }
 
-            // Verify no payment record was created
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT COUNT(*) FROM loan_payments WHERE loan_id = ? and payment_amount = ?")) {
                 statement.setInt(1, loanId);

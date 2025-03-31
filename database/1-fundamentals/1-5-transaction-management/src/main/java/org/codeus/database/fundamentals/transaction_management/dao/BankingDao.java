@@ -5,7 +5,6 @@ import org.codeus.database.fundamentals.transaction_management.error.CustomerNot
 import org.codeus.database.fundamentals.transaction_management.error.DaoOperationException;
 import org.codeus.database.fundamentals.transaction_management.error.InsufficientFundsException;
 import org.codeus.database.fundamentals.transaction_management.error.InvalidPaymentException;
-import org.codeus.database.fundamentals.transaction_management.error.LoanApprovalException;
 import org.codeus.database.fundamentals.transaction_management.error.LoanNotFoundException;
 import org.codeus.database.fundamentals.transaction_management.model.Account;
 
@@ -14,16 +13,16 @@ import java.math.BigDecimal;
 public interface BankingDao {
 
     /**
-     * Creates a new account for a customer with transaction management.
+     * Creates a new account for a customer.
      * <p>
      * This method performs the following steps:
      * <ul>
      * <li>Starts a transaction by setting auto-commit to false.</li>
-     * <li>Checks if the customer exists in the database. If the customer does not exist, throws {@code CustomerNotFoundException}.</li>
-     * <li>Inserts a new record into the accounts table with the provided account details.</li>
-     * <li>Retrieves the generated account ID and sets it to the provided {@code Account} object.</li>
+     * <li>Checks if the customer exists in the <code>customers</code> table. If the customer does not exist, throws {@link CustomerNotFoundException}.</li>
+     * <li>Inserts a new record into the <code>accounts</code> table with the provided account details.</li>
+     * <li>Retrieves the generated account ID and sets it to the provided {@code account} object.</li>
      * <li>Commits the transaction.</li>
-     * <li>If any step fails, rolls back the transaction. If the rollback fails, throws {@code DaoOperationException}.</li>
+     * <li>If any step fails, rolls back the transaction. If the rollback fails, throws {@link DaoOperationException}.</li>
      * </ul>
      *
      * @param account the account to be created
@@ -37,12 +36,18 @@ public interface BankingDao {
      * <p>
      * This method performs the following steps:
      * <ul>
-     * <li>Sets transaction isolation level to READ COMMITTED to prevent dirty reads.</li>
-     * <li>Checks if the account exists and has sufficient funds (FOR UPDATE to lock the row).</li>
-     * <li>Updates the account balance by deducting the withdrawal amount.</li>
-     * <li>Inserts a transaction record into the transactions table.</li>
+     * <li>Validates if the input <code>amount</code> is less than or equal to 0. If true, throws {@link IllegalArgumentException}.</li>
+     * <li>Starts a transaction by setting auto-commit to false.</li>
+     * <li>Explicitly sets transaction isolation level to READ COMMITTED to prevent dirty reads.</li>
+     * <li>Checks if the account exists in the <code>accounts</code> table and has sufficient funds.</li>
+     * <ul>
+     *     <li>Throws {@link AccountNotFoundException} in case the account does not exist.</li>
+     *     <li>Throws {@link InsufficientFundsException} in case the account does not have enough money on the balance.</li>
+     * </ul>
+     * <li>Updates the account balance in the <code>accounts</code> table by deducting the withdrawal amount.</li>
+     * <li>Inserts a transaction record into the <code>transactions</code> table.</li>
      * <li>Commits the transaction.</li>
-     * <li>If any step fails, rolls back the entire transaction.</li>
+     * <li>If any step fails, rolls back the transaction. If the rollback fails, throws {@link DaoOperationException}.</li>
      * </ul>
      *
      * @param accountId the ID of the account to withdraw from
@@ -58,15 +63,23 @@ public interface BankingDao {
      * <p>
      * This method performs the following steps:
      * <ul>
+     * <li>Validates if the input <code>amount</code> is less than or equal to 0. If true, throws {@link IllegalArgumentException}.</li>
+     * <li>Validate if <code>fromAccountId</code> equals to <code>toAccountId</code>. If true, throws {@link IllegalArgumentException}</li>
+     * <li>Starts a transaction by setting auto-commit to false.</li>
      * <li>Sets transaction isolation level to REPEATABLE READ to prevent non-repeatable reads.</li>
-     * <li>Locks and verifies the source account (FOR UPDATE).</li>
-     * <li>Checks if the source account has sufficient funds.</li>
-     * <li>Locks and verifies the destination account (FOR UPDATE).</li>
-     * <li>Updates the source account balance by deducting the transfer amount.</li>
-     * <li>Updates the destination account balance by adding the transfer amount.</li>
-     * <li>Inserts transaction records for both accounts.</li>
+     * <li>Checks if the <code>fromAccountId</code> exists in the <code>accounts</code> table and has sufficient funds.</li>
+     * <ul>
+     *     <li>Throws {@link AccountNotFoundException} in case the account does not exist.</li>
+     *     <li>Throws {@link InsufficientFundsException} in case the account does not have enough money on the balance.</li>
+     * </ul>
+     * <li>Checks if the <code>toAccountId</code> exists in the <code>accounts</code> table. If not than throws {@link AccountNotFoundException}</li>
+     * <li>Updates the source account balance in the <code>accounts</code> table by deducting the transfer amount.</li>
+     * <li>Updates the destination account balance in the <code>accounts</code> table by adding the transfer amount.</li>
+     * <li>Inserts transaction records for both accounts into the <code>transaction</code> table. Transaction type
+     *  should be <code>'transfer'</code>, amount should be equal to the input <code>amount</code>,
+     *  description should be <code>'Transfer to/from' + accountId</code></li>
      * <li>Commits the transaction.</li>
-     * <li>If any step fails, rolls back the entire transaction.</li>
+     * <li>If any step fails, rolls back the transaction. If the rollback fails, throws {@link DaoOperationException}.</li>
      * </ul>
      *
      * @param fromAccountId the ID of the source account
@@ -79,53 +92,36 @@ public interface BankingDao {
     void transferMoney(int fromAccountId, int toAccountId, BigDecimal amount);
 
     /**
-     * Processes a loan payment with savepoints to handle potential failures.
+     * Processes a loan payment with a savepoint to handle potential failures.
      * <p>
      * This method performs the following steps:
      * <ul>
+     * <li>Validates if the input <code>amount</code> is less than or equal to 0. If true, throws {@link IllegalArgumentException}.</li>
+     * <li>Starts a transaction by setting auto-commit to false.</li>
      * <li>Sets transaction isolation level to SERIALIZABLE to prevent phantom reads.</li>
-     * <li>Verifies the loan exists and gets its current balance (FOR UPDATE).</li>
-     * //     * todo: maybe not specify FOR UPDATE
-     * <li>Creates Savepoint 1 after loan verification.</li>
-     * <li>Updates the loan balance by deducting the payment amount.</li>
-     * <li>Creates Savepoint 2 after updating the loan balance.</li>
-     * <li>Inserts a payment record into the loan_payments table.</li>
-     * <li>If the payment record insertion fails due to a NULL constraint, rolls back to Savepoint 2 and retries.</li>
-     * <li>If other errors occur, rolls back to Savepoint 1 or rolls back the entire transaction.</li>
-     * <li>Commits the transaction if all steps succeed.</li>
+     * <li>Verifies the loan exists in the <code>loans</code> table (throws {@link LoanNotFoundException} if it doesn't)
+     * and gets its current balance.</li>
+     * <li>Throws {@link InvalidPaymentException} if <code>paymentAmount</code> is larger than the loan amount.</li>
+     * <li>Updates the loan balance in the <code>loans</code> table by deducting the payment amount.</li>
+     * <li>Creates Savepoint after updating the loan balance.</li>
+     * <li>Inserts a payment record into the <code>loan_payments</code> table.</li>
+     * <li>Commits the transaction.</li>
+     * <li>If {@link java.sql.SQLException} was caught:
+     * <ul>
+     *     <li>If the savepoint is present, rolls back to this savepoint and retries inserting into the
+     *     <code>loan_payments</code> table. If the retry succeeds, commits the transaction and ends the method execution.</li>
+     *     <li>If the savepoint is not present, rolls back the entire transaction.</li>
+     * </ul>
+     * <li>If any error occurred while handling the exception, tries rolling back the entire transaction. If the rollback
+     * fails, throws {@link DaoOperationException}.</li>
      * </ul>
      *
      * @param loanId        the ID of the loan to make a payment on
      * @param paymentAmount the amount to pay
+     * @param description   the description of the payment
      * @throws LoanNotFoundException   if the loan with the specified ID does not exist
      * @throws InvalidPaymentException if the payment amount is invalid (e.g., exceeds loan balance)
      * @throws DaoOperationException   if there is an error during the transaction or rollback
      */
-    // todo: add description doc
     void processLoanPayment(int loanId, BigDecimal paymentAmount, String description);
-
-    /**
-     * Processes a loan request with multiple savepoints to handle failures at different stages.
-     * <p>
-     * This method performs the following steps:
-     * <ul>
-     * <li>Verifies the customer exists.</li>
-     * <li>Creates Savepoint 1 after customer verification.</li>
-     * <li>Checks the customer's credit score (simulated).</li>
-     * <li>Creates a loan entry in the loans table with calculated interest rate.</li>
-     * <li>Creates Savepoint 2 after creating the loan entry.</li>
-     * <li>Attempts to deduct a processing fee from one of the customer's accounts.</li>
-     * <li>If the customer has no accounts or insufficient funds for the fee, rolls back to Savepoint 2.</li>
-     * <li>If loan creation fails, rolls back to Savepoint 1.</li>
-     * <li>If customer verification fails, rolls back the entire transaction.</li>
-     * <li>Commits the transaction if all steps succeed.</li>
-     * </ul>
-     *
-     * @param customerId the ID of the customer requesting the loan
-     * @param loanAmount the requested loan amount
-     * @throws CustomerNotFoundException if the customer with the specified ID does not exist
-     * @throws LoanApprovalException if the loan cannot be approved (e.g., credit score too low)
-     * @throws DaoOperationException if there is an error during the transaction or rollback
-     */
-//    void processLoanRequest(int customerId, BigDecimal loanAmount);
 }

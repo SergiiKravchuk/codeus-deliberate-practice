@@ -46,8 +46,6 @@ CREATE TABLE loans
     interest_rate   DECIMAL(5, 2)  NOT NULL,
     loan_start_date DATE           NOT NULL,
     loan_end_date   DATE           NOT NULL,
-    -- todo: remove the line below
-    -- balance         DECIMAL(15, 2) NOT NULL,
     FOREIGN KEY (customer_id) REFERENCES customers (customer_id)
 );
 
