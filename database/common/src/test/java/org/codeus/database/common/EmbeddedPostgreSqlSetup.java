@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +16,7 @@ import java.util.*;
 public abstract class EmbeddedPostgreSqlSetup {
 
   protected static EmbeddedPostgres postgres;
+  protected static DataSource dataSource;
   protected static Connection connection;
 
   private static final String SCHEMA_FILE = "schema.sql";
@@ -24,9 +26,11 @@ public abstract class EmbeddedPostgreSqlSetup {
   static void startDatabase() throws IOException {
     System.out.println("Starting embedded PostgreSQL...");
     postgres = EmbeddedPostgres.start();
+    postgres.getPostgresDatabase();
     try {
-      connection = postgres.getPostgresDatabase().getConnection();
-      connection.setAutoCommit(false); // For transaction control
+      dataSource = postgres.getPostgresDatabase();
+      connection = dataSource.getConnection();
+      connection.setAutoCommit(false);
       System.out.println("PostgreSQL started successfully");
     } catch (SQLException e) {
       throw new RuntimeException("Failed to get database connection", e);
@@ -65,6 +69,7 @@ public abstract class EmbeddedPostgreSqlSetup {
     // Load test data
     executeSqlFile(getResourcePath(TEST_DATA_FILE));
 
+    connection.commit();
     System.out.println("Setup complete");
   }
 
