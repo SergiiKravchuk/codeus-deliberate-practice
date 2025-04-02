@@ -1,8 +1,13 @@
 package org.codeus.database.fundamentals.concurrency_control;
 
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
-import org.junit.jupiter.api.*;
-import org.postgresql.util.PSQLException;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -19,7 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TransactionConcurrencyTest {
@@ -38,6 +48,8 @@ public class TransactionConcurrencyTest {
     private static final String TASK_05_DIR = "tasks/05-fix-anomaly-serialization/";
     private static final String TASK_06_DIR = "tasks/06-pessimistic-locking/";
     private static final String TASK_07_DIR = "tasks/07-optimistic-locking/";
+    private static final String TASK_08_DIR = "tasks/08-deadlock-scenario/";
+    private static final String TASK_09_DIR = "tasks/09-row-locks-for-share/";
 
     @BeforeAll
     static void startDatabase() throws IOException {
@@ -88,6 +100,295 @@ public class TransactionConcurrencyTest {
 
         connection.commit();
         System.out.println("Setup complete");
+    }
+
+    @Test
+    @Order(1)
+    void testReadCommitted() throws IOException, SQLException, InterruptedException, ExecutionException {
+        String readTransaction = Files.readString(Paths.get(getResourcePath(TASK_01_DIR + "1-1-repeatable-read-transaction.sql")));
+        String updateTransaction = Files.readString(Paths.get(getResourcePath(TASK_01_DIR + "1-2-concurrent-update-transaction.sql")));
+
+        executeConcurrently(readTransaction, updateTransaction);
+
+        List<Map<String, Object>> results = executeQuery(
+                "SELECT * FROM isolation_level_test ORDER BY test_id");
+
+        assertFalse(results.isEmpty(), "You must demonstrate NON-REPEATABLE-READ anomaly");
+
+        Map<String, Object> readCommittedResult = findIsolationLevelResult(results, "READ COMMITTED");
+        assertNotNull(readCommittedResult, "You must include a test for READ COMMITTED isolation level");
+
+        Object firstRead = readCommittedResult.get("first_read");
+        Object secondRead = readCommittedResult.get("second_read");
+        assertNotEquals(convertToDouble(firstRead), convertToDouble(secondRead),
+                "READ COMMITTED should demonstrate non-repeatable read (different values)");
+    }
+
+    @Test
+    @Order(2)
+    void testNonRepeatableRead() throws IOException, SQLException, InterruptedException, ExecutionException {
+        String readTransaction = Files.readString(Paths.get(getResourcePath(TASK_02_DIR + "2-1-fix-repeatable-read-transaction.sql")));
+        String updateTransaction = Files.readString(Paths.get(getResourcePath(TASK_02_DIR + "2-2-fix-concurrent-update-transaction.sql")));
+
+        executeConcurrently(readTransaction, updateTransaction);
+
+        List<Map<String, Object>> results = executeQuery(
+                "SELECT * FROM isolation_level_test ORDER BY test_id");
+
+        assertFalse(results.isEmpty(), "You must demonstrate REPEATABLE READ isolation levels");
+
+        Map<String, Object> repeatableReadResult = findIsolationLevelResult(results, "REPEATABLE READ");
+        assertNotNull(repeatableReadResult, "You must include a test for READ COMMITTED isolation level");
+
+        var firstRead = repeatableReadResult.get("first_read");
+        var secondRead = repeatableReadResult.get("second_read");
+        assertEquals(convertToDouble(firstRead), convertToDouble(secondRead),
+                "REPEATABLE READ should prevent non-repeatable read (same values)");
+    }
+
+    @Test
+    @Order(3)
+    void testReadCommitedPhantomRead() throws IOException, SQLException, InterruptedException, ExecutionException {
+        String readTransaction = Files.readString(Paths.get(getResourcePath(TASK_03_DIR + "3-1-phantom-read-transaction.sql")));
+        String updateTransaction = Files.readString(Paths.get(getResourcePath(TASK_03_DIR + "3-2-phantom-read-update-transaction.sql")));
+
+        executeConcurrently(readTransaction, updateTransaction);
+
+        List<Map<String, Object>> results = executeQuery(
+                "SELECT * FROM isolation_level_test ORDER BY test_id");
+
+        assertFalse(results.isEmpty(), "You must demonstrate PHANTOM READ anomaly");
+
+        Map<String, Object> repeatableReadResult = findIsolationLevelResult(results, "READ COMMITTED");
+        assertNotNull(repeatableReadResult, "You must include a test for READ COMMITTED isolation level");
+
+        var firstRead = repeatableReadResult.get("first_read");
+        var secondRead = repeatableReadResult.get("second_read");
+        assertEquals(convertToDouble(firstRead), convertToDouble(secondRead),
+                "READ COMMITTED should demonstrate PHANTOM READ(different values for set)");
+    }
+
+    @Test
+    @Order(4)
+    void testReadCommitedSerializableLostUpdate() throws IOException, SQLException, InterruptedException, ExecutionException {
+        String readTransaction = Files.readString(Paths.get(getResourcePath(TASK_04_DIR + "4-1-non-serialization-transaction.sql")));
+        String updateTransaction = Files.readString(Paths.get(getResourcePath(TASK_04_DIR + "4-2-concurrent-update-transaction.sql")));
+
+        executeConcurrently(readTransaction, updateTransaction);
+
+        List<Map<String, Object>> results = executeQuery(
+                "SELECT * FROM serialization_test_results ORDER BY result_id");
+
+        assertFalse(results.isEmpty(), "You must demonstrate LOST UPDATE anomaly");
+
+        Map<String, Object> repeatableReadResult = findIsolationLevelResult(results, "READ COMMITTED");
+        assertNotNull(repeatableReadResult, "You must include a test for SERIALIZABLE isolation level");
+
+        var firstRead = repeatableReadResult.get("final_balance");
+        var secondRead = repeatableReadResult.get("final_balance");
+        assertEquals(convertToDouble(firstRead), convertToDouble(secondRead),
+                "REPEATABLE READ should demonstrate SERIALISATION ANOMALY(values of final transaction should be less than 1500)");
+    }
+
+    @Test
+    @Order(5)
+    void testSerializableSerialization() throws IOException, SQLException, InterruptedException {
+        String firstTr = Files.readString(Paths.get(getResourcePath(TASK_05_DIR + "5-1-fix-serialization-transaction.sql")));
+        String secondTr = Files.readString(Paths.get(getResourcePath(TASK_05_DIR + "5-2-fix-concurrent-update-transaction.sql")));
+
+        SQLException exception = assertThrows(SQLException.class, () -> {
+            executeConcurrently(firstTr, secondTr);
+        }, "You must demonstrate SERIALIZATION FAILURE");
+
+        Throwable initialException = exception.getCause().getCause();
+        assertTrue(initialException.getMessage().contains("could not serialize access"),
+                "You must demonstrate SERIALIZATION FAILURE, " +
+                        "which contains message 'could not serialize access', but was: " + initialException.getMessage());
+    }
+
+    @Test
+    @Order(5)
+    void testPessimisticLocking() throws IOException, SQLException, InterruptedException, ExecutionException {
+        String firstTr = Files.readString(Paths.get(getResourcePath(TASK_06_DIR + "6-1-pessimistic-lock.sql")));
+        String secondTr = Files.readString(Paths.get(getResourcePath(TASK_06_DIR + "6-2-update-during-pessimistic-lock.sql")));
+
+        executeConcurrently(firstTr, secondTr);
+
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            // Check the final account balances
+            ResultSet balanceRs = stmt.executeQuery(
+                    "SELECT account_id, balance FROM accounts ORDER BY account_id");
+
+            // Account 1 should be decreased by 500 - 100 = 400 (500 from transfer, +100 from second tx)
+            balanceRs.next();
+            assertEquals(1, balanceRs.getInt("account_id"));
+            assertEquals(600.0, balanceRs.getDouble("balance"), 0.01);
+
+            // Account 2 should be increased by 500
+            balanceRs.next();
+            assertEquals(2, balanceRs.getInt("account_id"));
+            assertEquals(2500.0, balanceRs.getDouble("balance"), 0.01);
+
+            // Check the test results
+            ResultSet rs = stmt.executeQuery(
+                    "SELECT * FROM lock_test_results ORDER BY transaction_id");
+
+            // First transaction
+            rs.next();
+            assertEquals(1, rs.getInt("transaction_id"));
+            assertEquals("PESSIMISTIC", rs.getString("lock_type"));
+            assertEquals(1, rs.getInt("account_id"));
+            assertEquals(1000.0, rs.getDouble("initial_balance"), 0.01);
+            assertEquals(500.0, rs.getDouble("final_balance"), 0.01);
+            assertTrue(rs.getBoolean("success"));
+
+            // Second transaction
+            rs.next();
+            assertEquals(2, rs.getInt("transaction_id"));
+            assertEquals("PESSIMISTIC", rs.getString("lock_type"));
+            assertEquals(1, rs.getInt("account_id"));
+            assertEquals(500.0, rs.getDouble("initial_balance"), 0.01);
+            assertEquals(600.0, rs.getDouble("final_balance"), 0.01);
+            assertTrue(rs.getBoolean("success"));
+
+            // Verify the blocking time - should be roughly 2 seconds or more
+            double blockingTime = rs.getDouble("blocking_time_ms");
+            System.out.println("Transaction 2 was blocked for " + blockingTime + " ms");
+            assertTrue(blockingTime >= 1500,
+                    "Second transaction should have been blocked by the first transaction's lock");
+
+            System.out.println("Pessimistic locking test passed: transactions executed sequentially as expected");
+        }
+    }
+
+    @Test
+    @Order(6)
+    void testOptimisticLocking() throws IOException, SQLException, InterruptedException, ExecutionException {
+        String firstTr = Files.readString(Paths.get(getResourcePath(TASK_07_DIR + "7-1-optimistic-lock.sql")));
+        String secondTr = Files.readString(Paths.get(getResourcePath(TASK_07_DIR + "7-2-update-during-optimistic-lock.sql")));
+
+        executeConcurrently(firstTr, secondTr);
+
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            // Check the final account balances
+            ResultSet balanceRs = stmt.executeQuery(
+                    "SELECT account_id, balance, version FROM accounts ORDER BY account_id");
+
+            // Account 1 should be modified by transaction 2 only (increased by 100)
+            balanceRs.next();
+            assertEquals(1, balanceRs.getInt("account_id"));
+            assertEquals(1100.0, balanceRs.getDouble("balance"), 0.01);
+            assertEquals(2, balanceRs.getInt("version"));
+
+            // Account 2 should be unchanged
+            balanceRs.next();
+            assertEquals(2, balanceRs.getInt("account_id"));
+            assertEquals(2500.0, balanceRs.getDouble("balance"), 0.01);
+            assertEquals(2, balanceRs.getInt("version"));
+
+            // Check the test results
+            ResultSet rs = stmt.executeQuery(
+                    "SELECT * FROM lock_test_results ORDER BY transaction_id");
+
+            // Second transaction should have failed due to optimistic lock conflict
+            rs.next();
+            assertEquals(1, rs.getInt("transaction_id"));
+            assertEquals("OPTIMISTIC", rs.getString("lock_type"));
+            assertEquals(1, rs.getInt("account_id"));
+            assertEquals(1000.0, rs.getDouble("initial_balance"), 0.01);
+            assertFalse(rs.getBoolean("success"));
+            assertEquals(1, rs.getInt("version_before"));
+
+            // Second transaction should have success
+            rs.next();
+            assertEquals(2, rs.getInt("transaction_id"));
+            assertEquals("OPTIMISTIC", rs.getString("lock_type"));
+            assertEquals(1, rs.getInt("account_id"));
+            assertEquals(1000.0, rs.getDouble("initial_balance"), 0.01);
+            assertEquals(1100.0, rs.getDouble("final_balance"), 0.01);
+            assertTrue(rs.getBoolean("success"));
+            assertEquals(1, rs.getInt("version_before"));
+            assertEquals(2, rs.getInt("version_after"));
+
+            // Unlike pessimistic locking, optimistic locking should not block
+            double executionTime = rs.getDouble("execution_time_ms");
+            System.out.println("Transaction 2 executed in " + executionTime + " ms");
+
+            System.out.println("Optimistic locking test passed: concurrent modification detected as expected");
+        }
+    }
+
+    @Test
+    @Order(7)
+    void testDeadlockDetection() throws IOException, SQLException, InterruptedException, ExecutionException {
+        String firstTr = Files.readString(Paths.get(getResourcePath(TASK_08_DIR + "8-1-deadlock-tr-1.sql")));
+        String secondTr = Files.readString(Paths.get(getResourcePath(TASK_08_DIR + "8-2-deadlock-tr-2.sql")));
+
+        SQLException exception = assertThrows(SQLException.class, () -> {
+            executeConcurrently(firstTr, secondTr);
+        }, "Dead lock demo");
+
+
+        Throwable initialException = exception.getCause().getCause();
+        assertTrue(initialException.getMessage().contains("deadlock"),
+                "You must demonstrate deadlock, " +
+                        "which contains message 'deadlock', but was: " + initialException.getMessage());
+
+        System.out.println("\nDeadlock test validation completed");
+    }
+
+    @Test
+    @Order(9)
+    void testSelectForShare() throws IOException, SQLException, InterruptedException, ExecutionException {
+        String firstTr = Files.readString(Paths.get(getResourcePath(TASK_09_DIR + "9-1-row-lock-share-model.sql")));
+        String secondTr = Files.readString(Paths.get(getResourcePath(TASK_09_DIR + "9-2-row-lock-share-concurrent.sql")));
+
+        executeConcurrently(firstTr, secondTr);
+
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            // Check if both transactions acquired SHARE locks
+            ResultSet rs = stmt.executeQuery(
+                    "SELECT COUNT(*) FROM lock_test_results WHERE lock_mode = 'FOR SHARE'");
+            rs.next();
+            int shareLockCount = rs.getInt(1);
+
+            // Both transactions should have acquired SHARE locks
+            assertEquals(2, shareLockCount,
+                    "Both transactions should have acquired SHARE locks concurrently");
+
+            // Check if both operations succeeded
+            ResultSet successRs = stmt.executeQuery(
+                    "SELECT transaction_id, operation, success FROM lock_test_results " +
+                            "WHERE operation IN ('READ', 'UPDATE') ORDER BY transaction_id");
+
+            // Transaction 1 should have successfully updated
+            successRs.next();
+            assertEquals(1, successRs.getInt("transaction_id"));
+            assertEquals("UPDATE", successRs.getString("operation"));
+            assertTrue(successRs.getBoolean("success"));
+
+            // Transaction 2 should have successfully read
+            successRs.next();
+            assertEquals(2, successRs.getInt("transaction_id"));
+            assertEquals("READ", successRs.getString("operation"));
+            assertTrue(successRs.getBoolean("success"));
+
+            // Verify final balance is correct after the UPDATE operation
+            ResultSet inventoryRs = stmt.executeQuery(
+                    "SELECT balance FROM accounts WHERE customer_id = 1");
+            inventoryRs.next();
+            int finalBalance = inventoryRs.getInt("balance");
+            assertEquals(900, finalBalance,
+                    "Final balance should be 900 after Transaction 1's update of -100");
+
+            System.out.println("FOR SHARE lock test passed: Multiple transactions can acquire SHARE locks concurrently");
+        }
     }
 
     protected String getResourcePath(String resourceName) {
@@ -225,12 +526,6 @@ public class TransactionConcurrencyTest {
         return cause;
     }
 
-    private List<Map<String, Object>> executeQueryFromFile(String queryFilePath) throws IOException, SQLException {
-        String filePath = "src/test/resources/" + queryFilePath;
-        String sql = Files.readString(Paths.get(filePath)).trim();
-        return executeQuery(sql);
-    }
-
     private List<Map<String, Object>> executeQuery(String sql) throws SQLException {
         System.out.printf("Executing query:%n%s%n%n", sql);
 
@@ -302,257 +597,5 @@ public class TransactionConcurrencyTest {
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(sql);
         }
-    }
-
-    @Test
-    @Order(1)
-    void testReadCommitted() throws IOException, SQLException, InterruptedException, ExecutionException {
-        String readTransaction = Files.readString(Paths.get(getResourcePath(TASK_01_DIR + "11-repeatable-read-transaction.sql")));
-        String updateTransaction = Files.readString(Paths.get(getResourcePath(TASK_01_DIR + "12-concurrent-update-transaction.sql")));
-
-        executeConcurrently(readTransaction, updateTransaction);
-
-        List<Map<String, Object>> results = executeQuery(
-                "SELECT * FROM isolation_level_test ORDER BY test_id");
-
-        assertFalse(results.isEmpty(), "You must demonstrate NON-REPEATABLE-READ anomaly");
-
-        Map<String, Object> readCommittedResult = findIsolationLevelResult(results, "READ COMMITTED");
-        assertNotNull(readCommittedResult, "You must include a test for READ COMMITTED isolation level");
-
-        Object firstRead = readCommittedResult.get("first_read");
-        Object secondRead = readCommittedResult.get("second_read");
-        assertNotEquals(convertToDouble(firstRead), convertToDouble(secondRead),
-                "READ COMMITTED should demonstrate non-repeatable read (different values)");
-    }
-
-
-    @Test
-    @Order(2)
-    void testNonRepeatableRead() throws IOException, SQLException, InterruptedException, ExecutionException {
-        String readTransaction = Files.readString(Paths.get(getResourcePath(TASK_02_DIR + "21-fix-repeatable-read-transaction.sql")));
-        String updateTransaction = Files.readString(Paths.get(getResourcePath(TASK_02_DIR + "22-fix-concurrent-update-transaction.sql")));
-
-        executeConcurrently(readTransaction, updateTransaction);
-
-        List<Map<String, Object>> results = executeQuery(
-                "SELECT * FROM isolation_level_test ORDER BY test_id");
-
-        assertFalse(results.isEmpty(), "You must demonstrate REPEATABLE READ isolation levels");
-
-        Map<String, Object> repeatableReadResult = findIsolationLevelResult(results, "REPEATABLE READ");
-        assertNotNull(repeatableReadResult, "You must include a test for READ COMMITTED isolation level");
-
-        var firstRead = repeatableReadResult.get("first_read");
-        var secondRead = repeatableReadResult.get("second_read");
-        assertEquals(convertToDouble(firstRead), convertToDouble(secondRead),
-                "REPEATABLE READ should prevent non-repeatable read (same values)");
-    }
-
-    @Test
-    @Order(3)
-    void testReadCommitedPhantomRead() throws IOException, SQLException, InterruptedException, ExecutionException {
-        String readTransaction = Files.readString(Paths.get(getResourcePath(TASK_03_DIR + "31-phantom-read-transaction.sql")));
-        String updateTransaction = Files.readString(Paths.get(getResourcePath(TASK_03_DIR + "32-phantom-read-update-transaction.sql")));
-
-        executeConcurrently(readTransaction, updateTransaction);
-
-        List<Map<String, Object>> results = executeQuery(
-                "SELECT * FROM isolation_level_test ORDER BY test_id");
-
-        assertFalse(results.isEmpty(), "You must demonstrate PHANTOM READ anomaly");
-
-        Map<String, Object> repeatableReadResult = findIsolationLevelResult(results, "READ COMMITTED");
-        assertNotNull(repeatableReadResult, "You must include a test for READ COMMITTED isolation level");
-
-        var firstRead = repeatableReadResult.get("first_read");
-        var secondRead = repeatableReadResult.get("second_read");
-        assertEquals(convertToDouble(firstRead), convertToDouble(secondRead),
-                "READ COMMITTED should demonstrate PHANTOM READ(different values for set)");
-    }
-
-    @Test
-    @Order(4)
-    void testReadCommitedSerializableLostUpdate() throws IOException, SQLException, InterruptedException, ExecutionException {
-        String readTransaction = Files.readString(Paths.get(getResourcePath(TASK_04_DIR + "41-non-serialization-transaction.sql")));
-        String updateTransaction = Files.readString(Paths.get(getResourcePath(TASK_04_DIR + "42-concurrent-update-transaction.sql")));
-
-        executeConcurrently(readTransaction, updateTransaction);
-
-        List<Map<String, Object>> results = executeQuery(
-                "SELECT * FROM serialization_test_results ORDER BY result_id");
-
-        assertFalse(results.isEmpty(), "You must demonstrate LOST UPDATE anomaly");
-
-        Map<String, Object> repeatableReadResult = findIsolationLevelResult(results, "READ COMMITTED");
-        assertNotNull(repeatableReadResult, "You must include a test for SERIALIZABLE isolation level");
-
-        var firstRead = repeatableReadResult.get("final_balance");
-        var secondRead = repeatableReadResult.get("final_balance");
-        assertEquals(convertToDouble(firstRead), convertToDouble(secondRead),
-                "REPEATABLE READ should demonstrate SERIALISATION ANOMALY(values of final transaction should be less than 1500)");
-    }
-
-    @Test
-    @Order(5)
-    void testSerializableSerialization() throws IOException, SQLException, InterruptedException {
-        String firstTr = Files.readString(Paths.get(getResourcePath(TASK_05_DIR + "51-fix-serialization-transaction.sql")));
-        String secondTr = Files.readString(Paths.get(getResourcePath(TASK_05_DIR + "52-fix-concurrent-update-transaction.sql")));
-
-        SQLException exception = assertThrows(SQLException.class, () -> {
-            executeConcurrently(firstTr, secondTr);
-        }, "You must demonstrate SERIALIZATION FAILURE");
-
-        Throwable initialException = exception.getCause().getCause();
-        assertTrue(initialException.getMessage().contains("could not serialize access"),
-                "You must demonstrate SERIALIZATION FAILURE, " +
-                        "which contains message 'could not serialize access', but was: " + initialException.getMessage());
-    }
-
-    /************************ LOCKING STRATEGY TESTS ************************/
-
-    @Test
-    @Order(5)
-    void testPessimisticLocking() throws IOException, SQLException, InterruptedException, ExecutionException {
-        String firstTr = Files.readString(Paths.get(getResourcePath(TASK_06_DIR + "61-pesitimistic-lock.sql")));
-        String secondTr = Files.readString(Paths.get(getResourcePath(TASK_06_DIR + "62-update-during-pesimistic-lock.sql")));
-
-        executeConcurrently(firstTr, secondTr);
-
-        try (Connection conn = dataSource.getConnection();
-             Statement stmt = conn.createStatement()) {
-
-            // Check the final account balances
-            ResultSet balanceRs = stmt.executeQuery(
-                    "SELECT account_id, balance FROM accounts ORDER BY account_id");
-
-            // Account 1 should be decreased by 500 - 100 = 400 (500 from transfer, +100 from second tx)
-            balanceRs.next();
-            assertEquals(1, balanceRs.getInt("account_id"));
-            assertEquals(600.0, balanceRs.getDouble("balance"), 0.01);
-
-            // Account 2 should be increased by 500
-            balanceRs.next();
-            assertEquals(2, balanceRs.getInt("account_id"));
-            assertEquals(2500.0, balanceRs.getDouble("balance"), 0.01);
-
-            // Check the test results
-            ResultSet rs = stmt.executeQuery(
-                    "SELECT * FROM lock_test_results ORDER BY transaction_id");
-
-            // First transaction
-            rs.next();
-            assertEquals(1, rs.getInt("transaction_id"));
-            assertEquals("PESSIMISTIC", rs.getString("lock_type"));
-            assertEquals(1, rs.getInt("account_id"));
-            assertEquals(1000.0, rs.getDouble("initial_balance"), 0.01);
-            assertEquals(500.0, rs.getDouble("final_balance"), 0.01);
-            assertTrue(rs.getBoolean("success"));
-
-            // Second transaction
-            rs.next();
-            assertEquals(2, rs.getInt("transaction_id"));
-            assertEquals("PESSIMISTIC", rs.getString("lock_type"));
-            assertEquals(1, rs.getInt("account_id"));
-            assertEquals(500.0, rs.getDouble("initial_balance"), 0.01);
-            assertEquals(600.0, rs.getDouble("final_balance"), 0.01);
-            assertTrue(rs.getBoolean("success"));
-
-            // Verify the blocking time - should be roughly 2 seconds or more
-            double blockingTime = rs.getDouble("blocking_time_ms");
-            System.out.println("Transaction 2 was blocked for " + blockingTime + " ms");
-            assertTrue(blockingTime >= 1500,
-                    "Second transaction should have been blocked by the first transaction's lock");
-
-            System.out.println("Pessimistic locking test passed: transactions executed sequentially as expected");
-        }
-    }
-
-    @Test
-    @Order(6)
-    void testOptimisticLocking() throws IOException, SQLException, InterruptedException, ExecutionException {
-        String firstTr = Files.readString(Paths.get(getResourcePath(TASK_07_DIR + "71-optimistic-lock.sql")));
-        String secondTr = Files.readString(Paths.get(getResourcePath(TASK_07_DIR + "72-update-during-optimistic-lock.sql")));
-
-        executeConcurrently(firstTr, secondTr);
-
-        try (Connection conn = dataSource.getConnection();
-             Statement stmt = conn.createStatement()) {
-
-            // Check the final account balances
-            ResultSet balanceRs = stmt.executeQuery(
-                    "SELECT account_id, balance, version FROM accounts ORDER BY account_id");
-
-            // Account 1 should be modified by transaction 2 only (increased by 100)
-            balanceRs.next();
-            assertEquals(1, balanceRs.getInt("account_id"));
-            assertEquals(1100.0, balanceRs.getDouble("balance"), 0.01);
-            assertEquals(2, balanceRs.getInt("version"));
-
-            // Account 2 should be unchanged
-            balanceRs.next();
-            assertEquals(2, balanceRs.getInt("account_id"));
-            assertEquals(2500.0, balanceRs.getDouble("balance"), 0.01);
-            assertEquals(2, balanceRs.getInt("version"));
-
-            // Check the test results
-            ResultSet rs = stmt.executeQuery(
-                    "SELECT * FROM lock_test_results ORDER BY transaction_id");
-
-            // Second transaction should have failed due to optimistic lock conflict
-            rs.next();
-            assertEquals(1, rs.getInt("transaction_id"));
-            assertEquals("OPTIMISTIC", rs.getString("lock_type"));
-            assertEquals(1, rs.getInt("account_id"));
-            assertEquals(1000.0, rs.getDouble("initial_balance"), 0.01);
-            assertFalse(rs.getBoolean("success"));
-            assertEquals(1, rs.getInt("version_before"));
-
-            // Second transaction should have success
-            rs.next();
-            assertEquals(2, rs.getInt("transaction_id"));
-            assertEquals("OPTIMISTIC", rs.getString("lock_type"));
-            assertEquals(1, rs.getInt("account_id"));
-            assertEquals(1000.0, rs.getDouble("initial_balance"), 0.01);
-            assertEquals(1100.0, rs.getDouble("final_balance"), 0.01);
-            assertTrue(rs.getBoolean("success"));
-            assertEquals(1, rs.getInt("version_before"));
-            assertEquals(2, rs.getInt("version_after"));
-
-            // Unlike pessimistic locking, optimistic locking should not block
-            double executionTime = rs.getDouble("execution_time_ms");
-            System.out.println("Transaction 2 executed in " + executionTime + " ms");
-
-            System.out.println("Optimistic locking test passed: concurrent modification detected as expected");
-        }
-    }
-
-    /************************ DEADLOCK TESTS ************************/
-
-    @Test
-    @Order(7)
-    void testDeadlockDetection() throws IOException, SQLException, InterruptedException {
-    }
-
-    @Test
-    @Order(8)
-    void testDeadlockPrevention() throws IOException, SQLException, InterruptedException {
-    }
-
-    /************************ ROW-LEVEL LOCKING TESTS ************************/
-
-    @Test
-    @Order(9)
-    void testRowLevelLocking() throws IOException, SQLException, InterruptedException {
-    }
-
-    @Test
-    @Order(10)
-    void testSelectForShare() throws IOException, SQLException, InterruptedException {
-    }
-
-    @Test
-    @Order(11)
-    void testSelectForUpdate() throws IOException, SQLException, InterruptedException {
     }
 }
