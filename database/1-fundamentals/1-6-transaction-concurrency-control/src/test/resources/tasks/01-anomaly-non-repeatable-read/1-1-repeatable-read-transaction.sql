@@ -8,7 +8,6 @@ BEGIN;
 --WORKING AREA
 
     --set correct isolation level
-    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
     --this is metadata, just ignore this row
     CREATE TEMP TABLE first_read AS
