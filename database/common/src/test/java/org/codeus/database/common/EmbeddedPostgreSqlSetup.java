@@ -108,6 +108,22 @@ public abstract class EmbeddedPostgreSqlSetup {
     return result;
   }
 
+  protected void executeQueriesFromFile(String filePath) throws IOException, SQLException {
+    String fileFullPath = getResourcePath(filePath);
+    executeSqlFile(fileFullPath);
+  }
+
+  private String filterOutCommentedLines(String sql) {
+    StringBuilder builder = new StringBuilder();
+    String commentOperator = "--";
+    for (String line: sql.split("\n")) {
+      if (!line.trim().startsWith(commentOperator)) {
+        builder.append(line);
+      }
+    }
+    return builder.toString();
+  }
+
   /**
    * Executes an SQL query and returns the results as a list of maps.
    */
