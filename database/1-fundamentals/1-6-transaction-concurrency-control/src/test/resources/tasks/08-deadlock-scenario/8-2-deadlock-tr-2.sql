@@ -1,15 +1,15 @@
 -- Transaction 2: Creates a deadlock by locking resources in order 2->1
 BEGIN;
+----------------------------------
+--WORKING AREA
 
--- First lock account 2
-SELECT * FROM accounts WHERE account_id = 2 FOR UPDATE;
+-- First lock account with id 2 using FOR UPDATE
 
 -- Now try to lock account 1, which Transaction 1 has already locked
 -- This will create a deadlock
-SELECT * FROM accounts WHERE account_id = 1 FOR UPDATE;
 
--- Try to update both accounts
-UPDATE accounts SET balance = balance - 200 WHERE account_id = 2;
-UPDATE accounts SET balance = balance + 200 WHERE account_id = 1;
+-- Try to update both accounts withdrowing -200 from account 2 and depositing +200 to account 1
 
+--WORKING AREA
+----------------------------------
 COMMIT;

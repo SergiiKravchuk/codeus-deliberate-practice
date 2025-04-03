@@ -1,20 +1,24 @@
+--This transaction is used to demonstrate the phantom read anomaly.
+-- It reads the set of data - account balance for a specific currency (EUR) twice within the same transaction.
+-- The goal is to show that the set of data can change between the two reads.
+--
+-- The transaction is expected to be executed in a concurrent environment,
+-- where another transaction may insert or delete rows that match the criteria between the two reads.
+-- The purpose of this transaction is to illustrate the phantom read anomaly.
 BEGIN;
 ----------------------------------
 --WORKING AREA
 
-    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    -- Set the isolation level to READ COMMITTED
 
     CREATE TEMP TABLE first_read AS
-    SELECT account_id, balance
-    FROM accounts
-    WHERE currency = 'EUR';
+    --read account_id and balance from accounts where currency = 'EUR';
 
     --WAIT_HERE
 
     CREATE TEMP TABLE second_read AS
-    SELECT account_id, balance
-    FROM accounts
-    WHERE currency = 'EUR';
+    --read account_id and balance from accounts where currency = 'EUR';
+
 
 --WORKING AREA
 ------------------------------------

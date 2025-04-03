@@ -4,22 +4,23 @@
 --
 --It should demonstrate LOST_UPDATE anomaly.
 BEGIN;
-SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+----------------------------------
+--WORKING AREA
+
+    -- Set the isolation level to READ COMMITTED
 
     -- Read the current total balance
     CREATE TEMP TABLE initial_balance AS
-    SELECT balance
-    FROM accounts
-    WHERE account_id = 2;
+    --read the balance of account 2
 
     --WAIT_HERE
 
     -- Withdraw $1500 from account 2 if balance >= 1500
-    UPDATE accounts
-    SET balance = balance - 1500
-    WHERE account_id = 2
-      AND (SELECT balance FROM initial_balance) >= 1500;
+    -- using update statement
 
+
+--WORKING AREA
+----------------------------------
 INSERT INTO serialization_test_results
     (isolation_level, transaction_id, initial_total, final_balance, status)
 VALUES ('READ COMMITTED',

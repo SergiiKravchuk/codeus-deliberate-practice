@@ -1,7 +1,7 @@
---Create a stored procedure that demonstrates isolation levels and returns results
+--This is this second transaction that will be
+--executed concurrently in the middle of first transaction execution.
 BEGIN;
-    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
-    UPDATE accounts
-    SET balance = balance + 10000
-    WHERE account_id = 4;
+    -- Set the isolation level to READ COMMITTED
+
+    -- Update the balance of the account with id 4 adding 10000 to current balance
 END;

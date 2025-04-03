@@ -1,7 +1,7 @@
---Create a stored procedure that demonstrates isolation levels and returns results
+--This is this second transaction that will be
+--executed concurrently in the middle of first transaction execution.
 BEGIN;
-    SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
-    UPDATE accounts
-    SET balance = balance + 10
-    WHERE account_id = 1;
+    -- Set the isolation level to REPEATABLE READ
+
+    -- Update the balance of the account with id 1 adding 10 to current balance
 END;
