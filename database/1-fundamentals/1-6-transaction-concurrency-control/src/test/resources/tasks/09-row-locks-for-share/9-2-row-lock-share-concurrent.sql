@@ -16,7 +16,6 @@ BEGIN;
            );
 
     -- Try to read the row account data (should succeed) for customer with id 1;
-    SELECT * FROM accounts WHERE customer_id = 1;
 
 --WORKING AREA
 ----------------------------------
