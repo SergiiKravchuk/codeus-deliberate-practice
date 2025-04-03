@@ -21,8 +21,7 @@ BEGIN;
 
     -- Update the target account
     -- update statement is used to withdraw -500 from balance and update version +1 of account with id 2
-    -- current version should be compared with previous one and update performed only if they are the same,
-    -- temp table account1_initial is used for this purpose
+
 
 --WORKING AREA
 ------------------------------------
