@@ -15,6 +15,7 @@ BEGIN;
 
     --WAIT_HERE
 
+    CREATE TEMP TABLE second_read AS
     --read again balance from accounts where account_id = 1;
 
 --WORKING AREA
