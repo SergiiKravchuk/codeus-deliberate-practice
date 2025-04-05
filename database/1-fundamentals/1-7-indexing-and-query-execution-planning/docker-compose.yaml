@@ -8,13 +8,18 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: postgres
-      APP_NUM_TRANSACTIONS: 1000000
+      APP_NUM_TRANSACTIONS: "1000000"
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-    command: ["postgres", "-c", "app.num_transactions=${APP_NUM_TRANSACTIONS}", "-c", "max_wal_size=1GB",]
+    command: [
+      "postgres",
+      "-c", "app.num_transactions=${APP_NUM_TRANSACTIONS}",
+      "-c",
+      "max_wal_size=1GB"
+    ]
 
   pgadmin:
     image: dpage/pgadmin4

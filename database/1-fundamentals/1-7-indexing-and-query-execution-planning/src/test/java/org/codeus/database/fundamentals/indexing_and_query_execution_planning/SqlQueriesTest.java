@@ -1,23 +1,19 @@
 package org.codeus.database.fundamentals.indexing_and_query_execution_planning;
 
 import org.codeus.database.common.EmbeddedPostgreSqlSetup;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -25,42 +21,112 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
 
     // File paths relative to src/test/resources
     private static final String QUERIES_DIR = "queries/";
+    private static final String B_TREE_INDEX_DIR = "b-tree-index/";
+    private static final String TRANSACTIONS_TABLE_NAME = "transactions";
+    private static final String ACCOUNTS_TABLE_NAME = "accounts";
 
-    @Test
-    @Order(1)
-    void test_01_BasicBTreeIndexOnCustomersEmail() throws IOException, SQLException {
-        String filename = "01_basic_b_tree_index_on_customers_email.sql";
-        executeQueriesFromFile(QUERIES_DIR + filename);
+    @Nested
+    @DisplayName("B-Tree index tests")
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class BTreeIndexTests {
+        @Test
+        @Order(1)
+        void O1_testBasicBTreeIndexOnTransactions() throws IOException, SQLException {
+            String filename = "01_basic_b_tree_index.sql";
+            executeQueriesFromFile(QUERIES_DIR + B_TREE_INDEX_DIR + filename);
 
-        String indexQuery = "SELECT indexname, indexdef FROM pg_indexes " +
-                "WHERE tablename = 'customers' AND indexname = 'idx_customers_email';";
+            String expectedIndexName = "transaction_amount_idx";
+            String expectedIndexDefinition = "CREATE INDEX transaction_amount_idx ON public.transactions USING btree (amount)";
 
-        List<Map<String, Object>> createdIndex = executeQuery(indexQuery);
 
-        printQueryResults(createdIndex);
+            List<Map<String, Object>> createdIndex = fetchIndexDetails(TRANSACTIONS_TABLE_NAME, expectedIndexName);
 
-        assertEquals(1, createdIndex.size(), "Index with name {%s} is not created.".formatted("idx_customers_email"));
-        Map<String, Object> indexRow = createdIndex.get(0);
-        boolean indexCorrect = "CREATE INDEX idx_customers_email ON public.customers USING btree (email)".equals(indexRow.get("indexdef"));
-        assertTrue(indexCorrect, "Index definition is not correct");
+            assertIndexExists(createdIndex, expectedIndexName);
+            assertIndexDefinition(createdIndex, expectedIndexDefinition);
+        }
+
+        @Test
+        @Order(5)
+        void O2_testCompositeBTreeIndexOnTransactions() throws IOException, SQLException {
+            String filename = "02_composite_b_tree_index_on_transactions.sql";
+            executeQueriesFromFile(QUERIES_DIR + B_TREE_INDEX_DIR + filename);
+
+            String expectedIndexName = "transaction_amount_and_date_idx";
+            String expectedIndexDefinition = "CREATE INDEX transaction_amount_and_date_idx ON public.transactions USING btree (amount, transaction_date)";
+
+
+            List<Map<String, Object>> createdIndex = fetchIndexDetails(TRANSACTIONS_TABLE_NAME, expectedIndexName);
+
+            assertIndexExists(createdIndex, expectedIndexName);
+            assertIndexDefinition(createdIndex, expectedIndexDefinition);
+        }
+
+        @Test
+        @Order(10)
+        void O3_testBTreeIndexWithSortingOnTransactions() throws IOException, SQLException {
+            String filename = "03_b_tree_index_with_sorting.sql";
+            executeQueriesFromFile(QUERIES_DIR + B_TREE_INDEX_DIR + filename);
+
+            String expectedIndexName = "transaction_account_id_and_date_idx";
+            String expectedIndexDefinition = "CREATE INDEX transaction_account_id_and_date_idx ON public.transactions USING btree (account_id, transaction_date)";
+
+
+            List<Map<String, Object>> createdIndex = fetchIndexDetails(TRANSACTIONS_TABLE_NAME, expectedIndexName);
+
+            assertIndexExists(createdIndex, expectedIndexName);
+            assertIndexDefinition(createdIndex, expectedIndexDefinition);
+        }
+
+        @Test
+        @Order(15)
+        void O4_testBTreePartialIndexOnTransactions() throws IOException, SQLException {
+            String filename = "04_b_tree_partial_index.sql";
+            executeQueriesFromFile(QUERIES_DIR + B_TREE_INDEX_DIR + filename);
+
+            String expectedIndexName = "account_type_idx";
+            String expectedIndexDefinition = "CREATE INDEX account_type_idx ON public.accounts USING btree (account_type) WHERE ((account_type)::text = 'savings'::text)";
+
+
+            List<Map<String, Object>> createdIndex = fetchIndexDetails(ACCOUNTS_TABLE_NAME, expectedIndexName);
+
+            assertIndexExists(createdIndex, expectedIndexName);
+            assertIndexDefinition(createdIndex, expectedIndexDefinition);
+        }
+
+        @Test
+        @Order(20)
+        void O5_testBTreeCoveringIndexOnTransactions() throws IOException, SQLException {
+            String filename = "05_b_tree_covering_index.sql";
+            executeQueriesFromFile(QUERIES_DIR + B_TREE_INDEX_DIR + filename);
+
+            String expectedIndexName = "transaction_amount_covering_idx";
+            String expectedIndexDefinition = "CREATE INDEX transaction_amount_covering_idx ON public.transactions USING btree (amount) INCLUDE (account_id, transaction_type)";
+
+
+            List<Map<String, Object>> createdIndex = fetchIndexDetails(TRANSACTIONS_TABLE_NAME, expectedIndexName);
+
+            assertIndexExists(createdIndex, expectedIndexName);
+            assertIndexDefinition(createdIndex, expectedIndexDefinition);
+        }
     }
 
-//    @ParameterizedTest
-//    @ValueSource(strings = {
-//            MANDATORY_COUNT_01, MANDATORY_COUNT_02, MANDATORY_COUNT_03, MANDATORY_SUM_04, MANDATORY_SUM_05,
-//            MANDATORY_SUM_06, MANDATORY_AVG_07, MANDATORY_AVG_08, MANDATORY_AVG_09, MANDATORY_MIN_MAX_10,
-//            MANDATORY_MIN_MAX_11, MANDATORY_MIN_MAX_12, MANDATORY_GROUPING_HAVING_13, MANDATORY_GROUPING_HAVING_14,
-//            MANDATORY_GROUPING_HAVING_15, OPTIONAL_COUNT_16, OPTIONAL_COUNT_17, OPTIONAL_COUNT_18, OPTIONAL_COUNT_19,
-//            OPTIONAL_COUNT_20, OPTIONAL_COUNT_21, OPTIONAL_SUM_22, OPTIONAL_SUM_23, OPTIONAL_SUM_24, OPTIONAL_SUM_25,
-//            OPTIONAL_SUM_26, OPTIONAL_AVG_27, OPTIONAL_AVG_28, OPTIONAL_AVG_29, OPTIONAL_AVG_30, OPTIONAL_MIN_MAX_31,
-//            OPTIONAL_MIN_MAX_32, OPTIONAL_MIN_MAX_33, OPTIONAL_MIN_MAX_34, OPTIONAL_GROUPING_HAVING_35,
-//            OPTIONAL_GROUPING_HAVING_36, OPTIONAL_GROUPING_HAVING_37, OPTIONAL_GROUPING_HAVING_38,
-//            OPTIONAL_GROUPING_HAVING_39, OPTIONAL_GROUPING_HAVING_40, OPTIONAL_GROUPING_HAVING_41,
-//            OPTIONAL_GROUPING_HAVING_42, OPTIONAL_GROUPING_HAVING_43, OPTIONAL_GROUPING_HAVING_44,
-//            OPTIONAL_GROUPING_HAVING_45
-//    })
-//    void testQuerySyntax(String queryFile) throws IOException {
-//        // This test just ensures the query can be executed without syntax errors
-//        assertDoesNotThrow(() -> executeQueryFromFile(queryFile));
-//    }
+
+    private List<Map<String, Object>> fetchIndexDetails(String tableName, String indexName) throws SQLException {
+        String indexQuery = String.format(
+                "SELECT indexname, indexdef FROM pg_indexes WHERE tablename = '%s' AND indexname = '%s';",
+                tableName,
+                indexName
+        );
+        return executeQuery(indexQuery);
+    }
+
+    private void assertIndexExists(List<Map<String, Object>> indexResults, String indexName) {
+        assertEquals(1, indexResults.size(), "Index with name {%s} is not created.".formatted(indexName));
+    }
+
+    private void assertIndexDefinition(List<Map<String, Object>> indexResults, String expectedDefinition) {
+        String actualDefinition = (String) indexResults.get(0).get("indexdef");
+        boolean isEqual = expectedDefinition.equals(actualDefinition);
+        assertTrue(isEqual, "Index definition is not correct");
+    }
 }

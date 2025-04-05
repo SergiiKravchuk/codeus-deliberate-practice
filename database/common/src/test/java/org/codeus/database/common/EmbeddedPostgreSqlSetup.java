@@ -77,7 +77,7 @@ public abstract class EmbeddedPostgreSqlSetup {
   private void executeSqlFile(String filePath) throws IOException, SQLException {
     Path path = Paths.get(filePath);
     String sql = Files.readString(path);
-
+    sql = filterOutCommentedLines(sql);
     try (Statement statement = connection.createStatement()) {
       // Execute each statement separately
       for (String query : sql.split(";")) {
