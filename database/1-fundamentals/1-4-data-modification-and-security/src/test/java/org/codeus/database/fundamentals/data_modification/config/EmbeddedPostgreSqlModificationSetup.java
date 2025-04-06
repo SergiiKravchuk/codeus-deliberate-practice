@@ -1,4 +1,4 @@
-package org.codeus.database.fundamentals.config;
+package org.codeus.database.fundamentals.data_modification.config;
 
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
 import java.io.IOException;
@@ -87,7 +87,7 @@ public abstract class EmbeddedPostgreSqlModificationSetup {
         final String sql = getSqlRequestFromFilePath(filePath);
 
         String rowSeparator = "==============================";
-        System.out.printf("Executing query:%n%s%n%s%s%n%n%n", rowSeparator, sql, rowSeparator);
+        System.out.printf("Executing query:%n%s%n%s%n%s%n%n%n", rowSeparator, sql, rowSeparator);
 
         List<Map<String, Object>> result = executeQuery(sql);
         printQueryResults(result);

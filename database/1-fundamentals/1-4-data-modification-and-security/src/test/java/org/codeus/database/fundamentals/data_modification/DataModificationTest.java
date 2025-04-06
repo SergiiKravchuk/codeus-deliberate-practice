@@ -1,4 +1,4 @@
-package org.codeus.database.fundamentals;
+package org.codeus.database.fundamentals.data_modification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import org.codeus.database.fundamentals.config.EmbeddedPostgreSqlModificationSetup;
+import org.codeus.database.fundamentals.data_modification.config.EmbeddedPostgreSqlModificationSetup;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.ClassOrderer;
 import org.junit.jupiter.api.DisplayName;
