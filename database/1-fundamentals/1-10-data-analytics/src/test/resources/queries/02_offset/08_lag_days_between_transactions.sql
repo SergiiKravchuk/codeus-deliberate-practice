@@ -1,0 +1,2 @@
+-- Task 8: Calculate the number of days between consecutive transactions for account 1003.
+-- Order by transaction_date. Display transaction_id, transaction_date, days_since_last_transaction. Hint: Use LAG() on the date.

@@ -1,0 +1,2 @@
+-- Task 7: For each transaction in account 1001, show the amount of the *previous* transaction for that same account. If it's the first transaction, show 0.00 as the default.
+-- Order by transaction_date. Display transaction_id, transaction_date, amount, previous_transaction_amount.

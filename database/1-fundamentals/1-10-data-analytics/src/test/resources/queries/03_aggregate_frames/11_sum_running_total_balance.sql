@@ -1,0 +1,2 @@
+-- Task 11: For each transaction of account 1001, calculate the cumulative sum of amounts up to that point (including the current transaction), ordered by date. This shows the account balance after each transaction.
+-- Display: transaction_id, transaction_date, amount, running_total_balance.

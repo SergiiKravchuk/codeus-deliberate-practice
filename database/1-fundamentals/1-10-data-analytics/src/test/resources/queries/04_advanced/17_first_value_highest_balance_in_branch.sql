@@ -1,0 +1,2 @@
+-- Task 17 (Optional): For each branch, find the account with the highest balance using FIRST_VALUE.
+-- Display branch_id, branch_name, account_id_highest_balance, highest_balance. Hint: Use a subquery or CTE.

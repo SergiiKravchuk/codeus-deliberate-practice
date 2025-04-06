@@ -1,0 +1,2 @@
+-- Task 2: Rank customers based on the number of accounts they hold. Customers with more accounts should have a lower rank (rank 1).
+-- Display customer_id, first_name, last_name, account_count, and the rank. Use RANK(). Handle ties appropriately.

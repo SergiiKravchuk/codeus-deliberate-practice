@@ -1,0 +1,2 @@
+-- Task 5: Find the top 3 highest transactions (based on absolute amount, regardless of type) for each account.
+-- Display account_id, transaction_id, transaction_date, amount, and the rank using RANK() or DENSE_RANK().

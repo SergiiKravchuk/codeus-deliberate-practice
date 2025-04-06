@@ -1,0 +1,2 @@
+-- Task 6: For each transaction in account 1001, show the amount of the *next* transaction for that same account. If it's the last transaction, show NULL.
+-- Order by transaction_date. Display transaction_id, transaction_date, amount, next_transaction_amount.
