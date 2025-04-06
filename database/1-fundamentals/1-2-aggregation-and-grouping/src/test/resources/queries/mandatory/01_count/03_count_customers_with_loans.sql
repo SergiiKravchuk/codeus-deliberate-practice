@@ -1,0 +1,1 @@
+-- 3. Find the total number of customers with at least one loan.

@@ -1,0 +1,1 @@
+-- 24. Find the total balance for each customer.

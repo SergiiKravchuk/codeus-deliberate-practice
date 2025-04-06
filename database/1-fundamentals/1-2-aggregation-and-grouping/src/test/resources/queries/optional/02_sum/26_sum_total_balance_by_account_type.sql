@@ -1,0 +1,1 @@
+-- 26. Find the total balance of checking and savings accounts separately.

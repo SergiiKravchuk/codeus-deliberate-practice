@@ -1,0 +1,1 @@
+-- 39. Find accounts that have received deposits totaling more than $500.

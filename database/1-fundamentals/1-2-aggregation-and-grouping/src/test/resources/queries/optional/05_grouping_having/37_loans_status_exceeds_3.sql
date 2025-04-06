@@ -1,0 +1,1 @@
+-- 37. Find loan statuses where the total number of loans exceeds 3.

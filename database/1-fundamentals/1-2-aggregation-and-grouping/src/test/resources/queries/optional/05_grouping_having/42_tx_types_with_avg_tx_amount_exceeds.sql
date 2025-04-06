@@ -1,0 +1,1 @@
+-- 42. Find transaction types where the average transaction amount is greater than $250.

@@ -1,0 +1,1 @@
+-- 31: Find the minimum and maximum interest rates for loans with terms longer than 36 months

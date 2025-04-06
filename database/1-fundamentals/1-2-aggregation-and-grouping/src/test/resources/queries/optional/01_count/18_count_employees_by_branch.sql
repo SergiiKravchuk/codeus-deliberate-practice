@@ -1,0 +1,1 @@
+-- 18. Count the number of employees per branch.
