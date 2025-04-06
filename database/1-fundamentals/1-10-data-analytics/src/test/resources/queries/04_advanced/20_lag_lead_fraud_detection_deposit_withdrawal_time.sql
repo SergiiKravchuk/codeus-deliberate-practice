@@ -1,0 +1,2 @@
+-- Task 20 (Optional - More Complex Fraud Detection): Identify accounts where a withdrawal occurs within 1 hour after a deposit on the same day.
+-- Display account_id, deposit_transaction_id, deposit_time, withdrawal_transaction_id, withdrawal_time. Hint: Use LAG/LEAD partitioned by account and date, potentially filtering on transaction type.

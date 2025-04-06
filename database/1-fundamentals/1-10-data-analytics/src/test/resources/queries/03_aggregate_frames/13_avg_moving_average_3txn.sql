@@ -1,0 +1,3 @@
+-- Task 13: Calculate the 3-transaction moving average for account 1001, ordered by date. The moving average for a row is the average amount of that transaction and the two immediately preceding it.
+-- Goal: Smooth out short-term spending fluctuations to see trends.
+-- Display: transaction_id, transaction_date, amount, moving_average_3txn.

@@ -1,0 +1,2 @@
+-- Task 18 (Optional): For each transaction for account 1001, show the transaction amount from 2 transactions ago. If not available, show NULL.
+-- Order by transaction_date. Display transaction_id, transaction_date, amount, amount_2_txns_ago.

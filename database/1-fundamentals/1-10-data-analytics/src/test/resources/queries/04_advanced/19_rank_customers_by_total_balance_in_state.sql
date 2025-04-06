@@ -1,0 +1,2 @@
+-- Task 19 (Optional): Rank customers within each state based on their total balance across all their accounts.
+-- Display state, customer_id, first_name, last_name, total_balance, rank_in_state.

@@ -1,0 +1,2 @@
+-- Task 1: Assign a unique row number to each transaction for account 1001, ordered by transaction date (earliest first).
+-- Select transaction_id, transaction_date, amount, and the row number.

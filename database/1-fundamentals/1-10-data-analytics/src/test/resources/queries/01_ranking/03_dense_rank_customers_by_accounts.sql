@@ -1,0 +1,2 @@
+-- Task 3: Same as Task 2, but use DENSE_RANK(). Observe the difference in handling ties compared to RANK().
+-- Display customer_id, first_name, last_name, account_count, and the dense rank.

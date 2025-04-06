@@ -1,0 +1,2 @@
+-- Task 4: Rank accounts within each branch based on their current balance in descending order (highest balance gets rank 1).
+-- Display branch_id, account_id, balance, and the rank using RANK().
