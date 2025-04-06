@@ -1,0 +1,2 @@
+-- check the schema for customers table in 'resources/schema.sql'
+-- insert a new value using columns names in a query explicitly
