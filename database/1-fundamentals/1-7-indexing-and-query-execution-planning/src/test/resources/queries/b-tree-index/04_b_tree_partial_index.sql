@@ -1,19 +1,16 @@
+------------------------------------------------------------------------------------------------------------------------
 -- TASK 4: Partial Index on Accounts
---
--- Create a partial B-Tree index on the account type column to optimize queries filtering for 'savings' accounts.
+------------------------------------------------------------------------------------------------------------------------
+-- Description: Create a partial B-Tree index on the account type column to
+-- optimize queries filtering for 'transfer' accounts.
 --
 -- Index Name: account_type_idx
 --
 -- Analyze the query with EXPLAIN ANALYZE.
 -- Query:
-SELECT account_type FROM accounts WHERE account_type = 'savings';
--- Create index
-
+SELECT account_type FROM accounts WHERE account_type = 'transfer';
+-- TODO: Create index:
+CREATE INDEX account_type_idx on accounts(account_type) where account_type = 'transfer';
 -- After index creation, check these queries:
--- SELECT account_type FROM accounts WHERE account_type = 'savings';
--- SELECT account_type FROM accounts WHERE account_type = 'checking';
-
-create index account_type_idx on accounts(account_type) where account_type = 'savings';
---
--- Expected solution:
--- create index account_type_idx on accounts(account_type) where account_type = 'savings';
+-- SELECT account_type FROM accounts WHERE account_type = 'transfer';
+-- SELECT account_type FROM accounts WHERE account_type = 'withdrawal';

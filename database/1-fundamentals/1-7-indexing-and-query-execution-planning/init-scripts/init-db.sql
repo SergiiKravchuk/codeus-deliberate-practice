@@ -96,21 +96,32 @@ END $$;
 DO $$
 DECLARE
     num_transactions INT := COALESCE(NULLIF(current_setting('app.num_transactions', TRUE), '')::INT, 1000000);
+    account_ids INT[];
+    acc_count INT;
 BEGIN
+    -- Load all account IDs once into an array
+    SELECT array_agg(id), COUNT(*) INTO account_ids, acc_count FROM accounts;
+
+    IF acc_count = 0 THEN
+        RAISE EXCEPTION 'No accounts available!';
+    END IF;
+
+    -- Insert random transactions
     INSERT INTO transactions (account_id, transaction_type, amount, transaction_date, target_account_id)
     SELECT
-        a.id,
+        account_ids[1 + (random() * (acc_count - 1))::INT],
         CASE
-            WHEN rnd < 0.5 THEN 'deposit'
+            WHEN rnd < 0.8 THEN 'deposit'
             WHEN rnd < 0.9 THEN 'withdrawal'
             ELSE 'transfer'
         END,
-        ROUND((abs(100 * sqrt(-2 * ln(random())) * cos(2 * pi() * random())))::NUMERIC, 2), -- Normal distribution-like values
+        ROUND((abs(100 * sqrt(-2 * ln(random())) * cos(2 * pi() * random())))::NUMERIC, 2),
         NOW() - INTERVAL '365 days' * power(random(), 3),
         CASE WHEN rnd >= 0.9 THEN
-            (SELECT id FROM accounts ORDER BY random() LIMIT 1)
+            account_ids[1 + (random() * (acc_count - 1))::INT]
         ELSE NULL END
     FROM (
-        SELECT id, random() AS rnd FROM accounts ORDER BY random() LIMIT num_transactions
-    ) a;
+        SELECT random() AS rnd FROM generate_series(1, num_transactions)
+    ) t;
 END $$;
+
