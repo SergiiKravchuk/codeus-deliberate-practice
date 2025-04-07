@@ -24,8 +24,8 @@ SELECT * FROM customers WHERE email LIKE 'sarah.williams%';
 -- 4. Re-run the query using EXPLAIN ANALYZE to verify that the new index is utilized.
 --
 -- TODO: Drop index:
-DROP INDEX idx_customers_email;
+
 -- TODO: Create index:
-CREATE INDEX idx_customers_email ON customers(email text_pattern_ops);
+
 --
 

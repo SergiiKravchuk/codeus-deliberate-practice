@@ -25,7 +25,7 @@ SELECT transaction_date, transaction_type, target_account_id
 -- STEP 3
 -- TODO: Drop the Incorrect Index
 ------------------------------------------------------------------------------------------------------------------------
-DROP INDEX idx_transactions_type_date;
+
 ------------------------------------------------------------------------------------------------------------------------
 -- STEP 4
 -- TODO: Create Correct Index with transaction_date as Leading Column
@@ -33,7 +33,7 @@ DROP INDEX idx_transactions_type_date;
 -- Index name: idx_transactions_date
 --
 ------------------------------------------------------------------------------------------------------------------------
-CREATE INDEX idx_transactions_date ON transactions(transaction_date);
+
 ------------------------------------------------------------------------------------------------------------------------
 -- STEP 5: Re-run the Query and Observe Index Usage
 -- Goal: Confirm that the correct index is now used

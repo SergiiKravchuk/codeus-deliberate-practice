@@ -10,7 +10,7 @@
 --
 -- Index name: idx_accounts_balance_hash
 --
-CREATE INDEX idx_accounts_balance_hash ON accounts USING hash (balance);
+
 --
 -- EXPLAIN ANALYZE QUERY:
 SELECT * FROM accounts WHERE balance > 5000;

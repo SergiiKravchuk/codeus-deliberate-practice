@@ -10,7 +10,7 @@
 -- Query:
 SELECT account_type FROM accounts WHERE account_type = 'transfer';
 -- TODO: Create index:
-CREATE INDEX account_type_idx on accounts(account_type) where account_type = 'transfer';
+
 -- After index creation, check these queries:
 -- SELECT account_type FROM accounts WHERE account_type = 'transfer';
 -- SELECT account_type FROM accounts WHERE account_type = 'withdrawal';

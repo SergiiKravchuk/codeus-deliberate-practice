@@ -9,7 +9,7 @@
 -- Query:
 SELECT account_id, transaction_type FROM transactions WHERE amount < 50;
 -- TODO: Create Index:
-CREATE INDEX transaction_amount_covering_idx ON transactions(amount) INCLUDE (account_id, transaction_type);
+
 -- After index creation, EXPLAIN ANALYZE these queries:
 --
 -- 1. SELECT account_id, transaction_type FROM transactions WHERE amount < 50;

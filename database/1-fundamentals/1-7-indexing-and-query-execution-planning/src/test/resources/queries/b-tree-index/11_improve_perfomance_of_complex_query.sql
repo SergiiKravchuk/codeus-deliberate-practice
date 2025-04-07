@@ -37,7 +37,7 @@ SELECT
 --
 -- Goal: Speed up filtering by customer name
 ------------------------------------------------------------------------------------------------------------------------
-CREATE INDEX idx_customers_name ON customers(first_name, last_name);
+
 ------------------------------------------------------------------------------------------------------------------------
 -- STEP 3:
 -- TODO: Create Index to speed up JOIN between customers and accounts
@@ -45,7 +45,7 @@ CREATE INDEX idx_customers_name ON customers(first_name, last_name);
 -- Index name: idx_accounts_customer_id
 --
 ------------------------------------------------------------------------------------------------------------------------
-CREATE INDEX idx_accounts_customer_id ON accounts(customer_id);
+
 ------------------------------------------------------------------------------------------------------------------------
 -- STEP 4:
 -- TODO: Create Index to speed up JOIN between accounts and transactions
@@ -53,7 +53,7 @@ CREATE INDEX idx_accounts_customer_id ON accounts(customer_id);
 -- Index name: idx_transactions_account_id
 --
 ------------------------------------------------------------------------------------------------------------------------
-CREATE INDEX idx_transactions_account_id ON transactions(account_id);
+
 ------------------------------------------------------------------------------------------------------------------------
 -- STEP 5: Re-run the Query and Check Plan
 -- Goal: Validate use of indexes and improved performance

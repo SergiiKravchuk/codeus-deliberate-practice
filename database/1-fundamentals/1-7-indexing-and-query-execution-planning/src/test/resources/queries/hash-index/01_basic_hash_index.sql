@@ -13,7 +13,7 @@ SELECT * FROM customers WHERE phone = '1234567890';
 --
 -- Index name: idx_customers_phone_hash
 --
-CREATE INDEX idx_customers_phone_hash ON customers USING hash (phone);
+
 -- Run EXPLAIN ANALYZE again:
 SELECT * FROM customers WHERE phone = '1234567890';
 --

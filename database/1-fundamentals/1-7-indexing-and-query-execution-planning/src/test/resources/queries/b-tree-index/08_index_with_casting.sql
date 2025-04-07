@@ -12,10 +12,11 @@ SELECT * FROM transactions WHERE CAST(transaction_date AS DATE) = '2025-04-01';
 --
 -- Task: Drop the current index and create a functional index with casting
 -- TODO: Drop index:
-DROP INDEX idx_transactions_date;
+
+--
 -- TODO: Create Index:
 --
 -- Index Name: idx_transactions_date
 --
-CREATE INDEX idx_transactions_date ON transactions((CAST(transaction_date AS DATE)));
+
 -- After index creation: analyze the query with EXPLAIN ANALYZE again.
