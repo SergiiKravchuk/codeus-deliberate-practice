@@ -129,7 +129,7 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
             executeQueriesFromFile(QUERIES_DIR + B_TREE_INDEX_DIR + filename);
 
             String expectedIndexName = "idx_customers_lower_first_name";
-            String expectedIndexDefinition = "CREATE INDEX idx_customers_lower_first_name ON public.customers USING btree (lower((email)::text))";
+            String expectedIndexDefinition = "CREATE INDEX idx_customers_lower_first_name ON public.customers USING btree (lower((first_name)::text))";
 
             List<Map<String, Object>> createdIndex = fetchIndexDetails(CUSTOMERS_TABLE_NAME, expectedIndexName);
 

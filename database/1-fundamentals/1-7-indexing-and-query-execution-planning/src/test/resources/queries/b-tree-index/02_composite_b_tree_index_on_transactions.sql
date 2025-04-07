@@ -7,7 +7,9 @@
 --
 -- Analyze the query with EXPLAIN ANALYZE.
 -- Query:
-SELECT amount, transaction_date FROM transactions WHERE amount > 200 AND transaction_date > NOW() - INTERVAL '10 days';
+SELECT amount, transaction_date
+ FROM transactions
+ WHERE amount > 500 AND transaction_date > NOW() - INTERVAL '10 days';
 -- TODO: Create index:
 CREATE INDEX transaction_amount_and_date_idx on transactions(amount, transaction_date);
 --

@@ -7,6 +7,9 @@
 -- that it is not used when the query uses a range condition.
 --
 -- TODO: Create a hash index on the accounts.balance column:
+--
+-- Index name: idx_accounts_balance_hash
+--
 CREATE INDEX idx_accounts_balance_hash ON accounts USING hash (balance);
 --
 -- EXPLAIN ANALYZE QUERY:

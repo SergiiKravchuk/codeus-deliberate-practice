@@ -40,20 +40,18 @@ SELECT
 CREATE INDEX idx_customers_name ON customers(first_name, last_name);
 ------------------------------------------------------------------------------------------------------------------------
 -- STEP 3:
--- TODO: Create Index on accounts.customer_id
+-- TODO: Create Index to speed up JOIN between customers and accounts
 --
 -- Index name: idx_accounts_customer_id
 --
--- Goal: Speed up JOIN between customers and accounts
 ------------------------------------------------------------------------------------------------------------------------
 CREATE INDEX idx_accounts_customer_id ON accounts(customer_id);
 ------------------------------------------------------------------------------------------------------------------------
 -- STEP 4:
--- TODO: Create Index on transactions.account_id
+-- TODO: Create Index to speed up JOIN between accounts and transactions
 --
 -- Index name: idx_transactions_account_id
 --
--- Goal: Speed up JOIN between accounts and transactions
 ------------------------------------------------------------------------------------------------------------------------
 CREATE INDEX idx_transactions_account_id ON transactions(account_id);
 ------------------------------------------------------------------------------------------------------------------------

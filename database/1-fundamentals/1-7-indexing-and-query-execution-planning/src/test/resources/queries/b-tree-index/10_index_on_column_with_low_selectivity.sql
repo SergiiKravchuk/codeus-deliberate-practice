@@ -44,6 +44,8 @@ DROP INDEX idx_transactions_type;
 --
 -- TODO: CREATE PARTIAL INDEX (for 'transfer'):
 --
+-- Index name: idx_transactions_transfer_partial
+--
 CREATE INDEX idx_transactions_transfer_partial
   ON transactions(transaction_type)
   WHERE transaction_type = 'transfer';

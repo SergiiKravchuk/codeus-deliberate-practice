@@ -9,5 +9,5 @@
 -- Query:
 SELECT first_name FROM customers WHERE lower(first_name) = 'emily';
 -- TODO: Create Index:
-CREATE INDEX idx_customers_lower_first_name ON customers(lower(email));
+CREATE INDEX idx_customers_lower_first_name ON customers(lower(first_name));
 -- After index creation: analyze the query with EXPLAIN ANALYZE again.
