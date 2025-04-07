@@ -1,14 +1,11 @@
 package org.codeus.database.fundamentals.indexing_and_query_execution_planning;
 
 import org.codeus.database.common.EmbeddedPostgreSqlSetup;
-import org.junit.jupiter.api.ClassOrderer;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import java.io.IOException;
