@@ -1,0 +1,25 @@
+------------------------------------------------------------------------------------------------------------------------
+-- TASK 2: Create a Materialized View for Transaction Summaries
+------------------------------------------------------------------------------------------------------------------------
+-- Description: Create a materialized view named 'transaction_daily_summary' that summarizes transaction
+-- data by date and type. This will be useful for reporting and analytics purposes without having to
+-- recalculate the summaries each time.
+--
+-- The materialized view should include:
+-- - Transaction date (just the date part, not time)
+-- - Transaction type (deposit, withdrawal, transfer)
+-- - Total number of transactions for that date and type
+-- - Total amount of transactions for that date and type
+-- - Average transaction amount for that date and type
+--
+-- View Name: transaction_daily_summary
+--
+-- Base this materialized view on the transactions table.
+-- Transaction date should be casted as DATE
+-- Group by transaction date (cast to DATE) and transaction type.
+-- Order them by transaction date and transaction type.
+--
+-- Query to test the view:
+-- SELECT * FROM transaction_daily_summary ORDER BY transaction_date, transaction_type;
+--
+-- TODO: Create Materialized View:

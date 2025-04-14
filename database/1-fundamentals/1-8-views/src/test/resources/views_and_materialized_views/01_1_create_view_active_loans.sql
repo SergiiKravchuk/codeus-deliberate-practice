@@ -1,0 +1,22 @@
+------------------------------------------------------------------------------------------------------------------------
+-- TASK 1: Create a View for Active Loans with Outstanding Balances
+------------------------------------------------------------------------------------------------------------------------
+-- Description: Create a view named 'active_loans_view' that shows all active loans with their customer information.
+-- The view should include:
+-- - Customer's first and last name
+-- - Customer's email
+-- - Loan amount
+-- - Interest rate
+-- - Term in months
+-- - Status (should only show 'active' loans)
+-- - Monthly payment amount (calculated as: amount * (1 + interest_rate/100) / term_months)
+--
+-- View Name: active_loans_view
+--
+-- Base this view on the customers and loans tables.
+-- Ensure that only active loans are included in the view.
+--
+-- Query to test the view:
+-- SELECT * FROM active_loans_view
+--
+-- TODO: Create View:

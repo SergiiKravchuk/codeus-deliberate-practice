@@ -74,7 +74,7 @@ public abstract class EmbeddedPostgreSqlSetup {
     }
   }
 
-  private void executeSqlFile(String filePath) throws IOException, SQLException {
+  protected void executeSqlFile(String filePath) throws IOException, SQLException {
     Path path = Paths.get(filePath);
     String sql = Files.readString(path);
     sql = filterOutCommentedLines(sql);
@@ -115,7 +115,7 @@ public abstract class EmbeddedPostgreSqlSetup {
     executeSqlFile(fileFullPath);
   }
 
-  private String filterOutCommentedLines(String sql) {
+  protected String filterOutCommentedLines(String sql) {
     StringBuilder builder = new StringBuilder();
     String commentOperator = "--";
     for (String line: sql.split("\n")) {
