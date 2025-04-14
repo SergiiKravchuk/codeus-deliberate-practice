@@ -78,15 +78,56 @@ public abstract class EmbeddedPostgreSqlSetup {
     Path path = Paths.get(filePath);
     String sql = Files.readString(path);
     sql = filterOutCommentedLines(sql);
-    try (Statement statement = connection.createStatement()) {
-      // Execute each statement separately
-      for (String query : sql.split(";")) {
-        if (!query.trim().isEmpty()) {
+
+    List<String> statements = new ArrayList<>();
+    StringBuilder currentStatement = new StringBuilder();
+    boolean insideDollarQuote = false;
+    String dollarTag = null;
+
+    for (String line : sql.split("\n")) {
+      String trimmedLine = line.trim();
+
+      // Detect start of dollar-quoted block (e.g., $$ or $func$)
+      if (!insideDollarQuote && trimmedLine.matches("(?i).*AS \\$[a-zA-Z0-9_]*\\$.*")) {
+        insideDollarQuote = true;
+        int idx = trimmedLine.indexOf("AS $");
+        int start = trimmedLine.indexOf('$', idx + 3);
+        int end = trimmedLine.indexOf('$', start + 1);
+        dollarTag = trimmedLine.substring(start, end + 1); // e.g., $func$
+      }
+
+      currentStatement.append(line).append("\n");
+
+      // If we’re inside a dollar-quoted block, wait until we close it
+      if (insideDollarQuote && trimmedLine.contains(dollarTag) && !trimmedLine.endsWith("AS " + dollarTag)) {
+        insideDollarQuote = false;
+      }
+
+      // If not inside a dollar block, and the line ends with a semicolon, we can consider it a full statement
+      if (!insideDollarQuote && trimmedLine.endsWith(";")) {
+        statements.add(currentStatement.toString().trim());
+        currentStatement.setLength(0);
+      }
+    }
+
+    // In case there's any leftover statement (without semicolon at end)
+    if (!currentStatement.toString().trim().isEmpty()) {
+      statements.add(currentStatement.toString().trim());
+    }
+
+    for (String query : statements) {
+      if (query.isEmpty()) continue;
+
+      System.out.println("Executing query:\n" + query);
+
+      if (query.toLowerCase().startsWith("explain")) {
+        List<Map<String, Object>> result = executeQuery(query);
+        printQueryResults(result);
+      } else {
+        try (Statement statement = connection.createStatement()) {
           statement.execute(query);
         }
       }
-    } catch (SQLException e) {
-      connection.rollback();
     }
   }
 
@@ -117,10 +158,9 @@ public abstract class EmbeddedPostgreSqlSetup {
 
   private String filterOutCommentedLines(String sql) {
     StringBuilder builder = new StringBuilder();
-    String commentOperator = "--";
-    for (String line: sql.split("\n")) {
-      if (!line.trim().startsWith(commentOperator)) {
-        builder.append(line);
+    for (String line : sql.split("\n")) {
+      if (!line.trim().startsWith("--")) {
+        builder.append(line).append("\n");
       }
     }
     return builder.toString();
