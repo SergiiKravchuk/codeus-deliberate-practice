@@ -143,17 +143,17 @@ public class ViewsAndMaterializedViewsTest extends EmbeddedPostgreSqlSetup {
 
         // Step 2: Validate transactions were inserted today
         List<Map<String, Object>> inserted = executeQuery("""
-        SELECT * FROM transactions
-        WHERE transaction_date::date = CURRENT_DATE
-        AND amount IN (750.00, 250.00)
-    """);
+    SELECT * FROM transactions
+    WHERE transaction_date::date = CURRENT_DATE
+    AND amount IN (750.00, 250.00)
+""");
         assertEquals(2, inserted.size(), "Expected 2 inserted transactions");
 
         // Step 3: Check if the view includes the new transactions → proves refresh happened
         List<Map<String, Object>> viewAfter = executeQuery("""
-        SELECT * FROM transaction_daily_summary
-        WHERE transaction_date = CURRENT_DATE
-    """);
+    SELECT * FROM transaction_daily_summary
+    WHERE transaction_date = CURRENT_DATE
+""");
 
         boolean foundDeposit = viewAfter.stream()
                 .anyMatch(row -> "deposit".equalsIgnoreCase((String) row.get("transaction_type")) &&
