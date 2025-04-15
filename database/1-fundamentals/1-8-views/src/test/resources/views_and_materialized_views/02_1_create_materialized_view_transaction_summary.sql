@@ -15,7 +15,9 @@
 -- View Name: transaction_daily_summary
 --
 -- Base this materialized view on the transactions table.
+-- Transaction date should be casted as DATE
 -- Group by transaction date (cast to DATE) and transaction type.
+-- Order them by transaction date and transaction type.
 --
 -- Query to test the view:
 -- SELECT * FROM transaction_daily_summary ORDER BY transaction_date, transaction_type;
