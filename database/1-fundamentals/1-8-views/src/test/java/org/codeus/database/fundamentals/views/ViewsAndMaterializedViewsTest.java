@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -126,46 +128,43 @@ public class ViewsAndMaterializedViewsTest extends EmbeddedPostgreSqlSetup {
     @DisplayName("Task 3: Refresh and analyze performance improvements of materialized views")
     void test03RefreshAnalyzeMaterializedView() throws IOException, SQLException {
 
-        executeQueriesFromFile(QUERIES_DIR + "03_1_refresh_analyze_materialized_view.sql");
-        // Step 2: Verify that the test transactions were inserted into the base table
+        String filename = QUERIES_DIR + "03_1_refresh_analyze_materialized_view.sql";
+        String sqlText = Files.readString(Paths.get(getResourcePath(filename)));
+        boolean containsRefresh = sqlText
+                .toLowerCase()
+                .contains("refresh materialized view transaction_daily_summary");
+
+        assertTrue(containsRefresh,
+                "Your SQL file is missing the required REFRESH MATERIALIZED VIEW transaction_daily_summary; " +
+                        "Please add it to make sure the materialized view is updated with new data.");
+
+        // Step 1: Execute student's SQL file
+        executeQueriesFromFile(filename);
+
+        // Step 2: Validate transactions were inserted today
         List<Map<String, Object>> inserted = executeQuery("""
         SELECT * FROM transactions
-        WHERE amount IN (750.00, 250.00)
-        AND transaction_date::date = CURRENT_DATE
-        ORDER BY amount
+        WHERE transaction_date::date = CURRENT_DATE
+        AND amount IN (750.00, 250.00)
     """);
-        System.out.println("Inserted transactions:");
-        printQueryResults(inserted);
-        assertEquals(2, inserted.size(), "Expected 2 new transactions to be inserted");
+        assertEquals(2, inserted.size(), "Expected 2 inserted transactions");
 
-        // Step 3: Read the materialized view after refresh
-        List<Map<String, Object>> afterRefresh = executeQuery("""
+        // Step 3: Check if the view includes the new transactions → proves refresh happened
+        List<Map<String, Object>> viewAfter = executeQuery("""
         SELECT * FROM transaction_daily_summary
         WHERE transaction_date = CURRENT_DATE
-        ORDER BY transaction_type
     """);
 
-        System.out.println("Materialized view contents for today:");
-        printQueryResults(afterRefresh);
-        assertFalse(afterRefresh.isEmpty(), "Materialized view should contain today's transactions after refresh");
+        boolean foundDeposit = viewAfter.stream()
+                .anyMatch(row -> "deposit".equalsIgnoreCase((String) row.get("transaction_type")) &&
+                        ((Number) row.get("total_amount")).doubleValue() >= 750.00);
 
-        // Step 4: Check if expected values are present
-        boolean foundDeposit = false, foundWithdrawal = false;
+        boolean foundWithdrawal = viewAfter.stream()
+                .anyMatch(row -> "withdrawal".equalsIgnoreCase((String) row.get("transaction_type")) &&
+                        ((Number) row.get("total_amount")).doubleValue() >= 250.00);
 
-        for (Map<String, Object> tx : afterRefresh) {
-            String type = (String) tx.get("transaction_type");
-            double totalAmount = ((Number) tx.get("total_amount")).doubleValue();
-
-            if ("deposit".equalsIgnoreCase(type) && totalAmount >= 750.00) {
-                foundDeposit = true;
-            }
-            if ("withdrawal".equalsIgnoreCase(type) && totalAmount >= 250.00) {
-                foundWithdrawal = true;
-            }
-        }
-
-        assertTrue(foundDeposit, "Expected deposit (750.00) not found in materialized view");
-        assertTrue(foundWithdrawal, "Expected withdrawal (250.00) not found in materialized view");
+        assertTrue(foundDeposit, "Expected deposit (750.00) not found — did the student refresh?");
+        assertTrue(foundWithdrawal, "Expected withdrawal (250.00) not found — did the student refresh?");
     }
 
     @Test

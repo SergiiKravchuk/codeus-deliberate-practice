@@ -118,9 +118,15 @@ public abstract class EmbeddedPostgreSqlSetup {
     for (String query : statements) {
       if (query.isEmpty()) continue;
 
+      String trimmedLower = query.trim().toLowerCase();
+
+      if (trimmedLower.startsWith("refresh materialized view")) {
+        System.out.println("DETECTED: REFRESH MATERIALIZED VIEW");
+      }
+
       System.out.println("Executing query:\n" + query);
 
-      if (query.toLowerCase().startsWith("explain")) {
+      if (trimmedLower.startsWith("explain")) {
         List<Map<String, Object>> result = executeQuery(query);
         printQueryResults(result);
       } else {
