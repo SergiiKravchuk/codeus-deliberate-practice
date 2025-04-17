@@ -26,6 +26,6 @@ CREATE TABLE customers_denormalized_order
 -- ['vip', 'most reliable', 'reliable', 'probably reliable', 'not reliable']
 -- The table name:
 -- `customers_normalized_order`
--- new field: `reliability_score`: varchar (0) and it is not null
+-- new field: `reliability_score`: varchar (30) and it is not null
 -- don't forget to add check that `reliability_score` has such values ['vip', 'most reliable', 'reliable', 'probably reliable', 'not reliable']
 
