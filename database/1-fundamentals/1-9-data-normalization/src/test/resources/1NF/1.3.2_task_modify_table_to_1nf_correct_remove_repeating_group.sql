@@ -23,7 +23,7 @@
 -- Create a new table with proper 1NF structure for contact information
 -- Copy the `customers_normalized_order_with_pk`
 -- New table name: `customers_1nf`
--- Replace the `customer_contact` with 4 new columns:
+-- Replace the `customer_contact` with 2 new columns:
 -- - contact_type VARCHAR(20)
 -- - contact_value VARCHAR(30)
 -- - Create a composite primary key of ssn and contact_type
