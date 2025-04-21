@@ -1,0 +1,9 @@
+-- ===================================================================================================
+-- DATABASE DESIGN
+-- ===================================================================================================
+--Goal:
+-- Design a small DB following the document design from the README.
+-- Populate your DB with some data, you can use data from the queries/block_3/input_data_sample.md file.
+-- ===================================================================================================
+-- WORKING AREA 👇
+-- 1. Bank Branch

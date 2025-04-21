@@ -1,9 +1,9 @@
-package org.codeus.database.common;
+package org.codeus.database.fundamentals.recap.setup;
 
-import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.postgresql.ds.PGSimpleDataSource;
+import org.postgresql.ds.common.BaseDataSource;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,22 +12,23 @@ import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
 
-public abstract class EmbeddedPostgreSqlSetup {
+public class ExternalPostgreSqlSetupHelper extends MetadataHolder {
 
   protected static Connection connection;
-  protected static EmbeddedPostgres postgres;
-
-  private static final String SCHEMA_FILE = "schema.sql";
-  private static final String TEST_DATA_FILE = "test-data.sql";
+  protected static BaseDataSource postgres;
 
   @BeforeAll
   static void startDatabase() throws IOException {
-    System.out.println("Starting embedded PostgreSQL...");
-    postgres = EmbeddedPostgres.start();
+    System.out.println("Connecting to PostgreSQL...");
+    postgres = new PGSimpleDataSource();
+    postgres.setUrl("jdbc:postgresql://localhost:5433/postgres");
+    postgres.setUser("admin");
+    postgres.setPassword("admin");
+
     try {
-      connection = postgres.getPostgresDatabase().getConnection();
+      connection = postgres.getConnection();
       connection.setAutoCommit(false); // For transaction control
-      System.out.println("PostgreSQL started successfully");
+      System.out.println("Successfully connected to PostgreSQL");
     } catch (SQLException e) {
       throw new RuntimeException("Failed to get database connection", e);
     }
@@ -35,7 +36,7 @@ public abstract class EmbeddedPostgreSqlSetup {
 
   @AfterAll
   static void stopDatabase() throws IOException {
-    System.out.println("Stopping embedded PostgreSQL...");
+    System.out.println("Closing connection to PostgreSQL...");
     if (connection != null) {
       try {
         connection.close();
@@ -43,38 +44,31 @@ public abstract class EmbeddedPostgreSqlSetup {
         System.err.println("Error closing connection: " + e.getMessage());
       }
     }
+  }
 
-    if (postgres != null) {
-      postgres.close();
-      System.out.println("PostgreSQL stopped successfully");
+  protected String getResourcePath(String resourceName) {
+    // In a real application, you would use a resource loader
+    // Here we're simplifying by using a relative path
+    return "src/test/resources/" + resourceName;
+  }
+
+  protected void executeQueriesFromFile(String filePath) throws IOException, SQLException {
+    String fileFullPath = getResourcePath(filePath);
+    executeSqlFile(fileFullPath);
+  }
+
+  private String filterOutCommentedLines(String sql) {
+    StringBuilder builder = new StringBuilder();
+    String commentOperator = "--";
+    for (String line: sql.split("\n")) {
+      if (!line.trim().startsWith(commentOperator)) {
+        builder.append(line);
+      }
     }
+    return builder.toString();
   }
 
-  @BeforeEach
-  void setupSchema() throws SQLException, IOException {
-    System.out.println("Setting up database schema and test data...");
-    // Start a transaction that will be rolled back after each test
-    connection.setAutoCommit(false);
-
-    // Clear any existing data
-    clearDatabase();
-
-    // Initialize database schema
-    executeSqlFile(getResourcePath(SCHEMA_FILE));
-
-    // Load test data
-    executeSqlFile(getResourcePath(TEST_DATA_FILE));
-
-    System.out.println("Setup complete");
-  }
-
-  private void clearDatabase() throws SQLException {
-    try (Statement statement = connection.createStatement()) {
-      statement.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
-    }
-  }
-
-  protected void executeSqlFile(String filePath) throws IOException, SQLException {
+  private void executeSqlFile(String filePath) throws IOException, SQLException {
     Path path = Paths.get(filePath);
     String sql = Files.readString(path);
     sql = filterOutCommentedLines(sql);
@@ -90,46 +84,10 @@ public abstract class EmbeddedPostgreSqlSetup {
     }
   }
 
-  protected String getResourcePath(String resourceName) {
-    // In a real application, you would use a resource loader
-    // Here we're simplifying by using a relative path
-    return "src/test/resources/" + resourceName;
-  }
-
-  /**
-   * Executes an SQL query from a file and returns the results.
-   */
-  protected List<Map<String, Object>> executeQueryFromFile(String filePath) throws IOException, SQLException {
-    String fileFullPath = getResourcePath(filePath);
-    String sql = Files.readString(Paths.get(fileFullPath)).trim();
-
-    System.out.printf("Executing query:%n%s%n%n", sql);
-
-    List<Map<String, Object>> result = executeQuery(sql);
-    printQueryResults(result);
-    return result;
-  }
-
-  protected void executeQueriesFromFile(String filePath) throws IOException, SQLException {
-    String fileFullPath = getResourcePath(filePath);
-    executeSqlFile(fileFullPath);
-  }
-
-  protected String filterOutCommentedLines(String sql) {
-    StringBuilder builder = new StringBuilder();
-    String commentOperator = "--";
-    for (String line: sql.split("\n")) {
-      if (!line.trim().startsWith(commentOperator)) {
-        builder.append(line);
-      }
-    }
-    return builder.toString();
-  }
-
   /**
    * Executes an SQL query and returns the results as a list of maps.
    */
-  protected List<Map<String, Object>> executeQuery(String sql) throws SQLException {
+  protected void executeQueryAndPrintResult(String sql) throws SQLException {
     List<Map<String, Object>> results = new ArrayList<>();
 
     try (Statement statement = connection.createStatement();
@@ -137,23 +95,27 @@ public abstract class EmbeddedPostgreSqlSetup {
       ResultSetMetaData metaData = resultSet.getMetaData();
       int columnCount = metaData.getColumnCount();
 
+
       List<String> columnNames = new ArrayList<>();
       for (int i = 1; i <= columnCount; i++) {
         columnNames.add(metaData.getColumnLabel(i));
       }
 
-      while (resultSet.next()) {
+      var numberOfResultToShow = 0;
+      while (resultSet.next() && numberOfResultToShow <= 20) {
         Map<String, Object> row = new LinkedHashMap<>();
         for (int i = 1; i <= columnCount; i++) {
           row.put(columnNames.get(i - 1), resultSet.getObject(i));
         }
         results.add(row);
+        numberOfResultToShow++;
       }
     }
 
-    return results;
+    printQueryResults(results);
   }
 
+  //TODO: align methods below with the EmbeddedPostgreSqlSetup.java to reduce duplication
   /**
    * Prints query results in a formatted table.
    */
@@ -209,11 +171,15 @@ public abstract class EmbeddedPostgreSqlSetup {
         String columnName = columnNames.get(i);
         Object value = row.get(columnName);
         String valueStr = value == null ? "NULL" : value.toString();
-        columnWidths[i] = Math.max(columnWidths[i], valueStr.length());
+        columnWidths[i] = Math.max(columnWidths[i], getLargestSubstringWidth(valueStr));
       }
     }
 
     return columnWidths;
+  }
+
+  private int getLargestSubstringWidth(String string) {
+    return Arrays.stream(string.split("\n")).map(String::length).max(Comparator.naturalOrder()).orElse(0);
   }
 
   private void printRow(List<String> values, int[] widths) {
