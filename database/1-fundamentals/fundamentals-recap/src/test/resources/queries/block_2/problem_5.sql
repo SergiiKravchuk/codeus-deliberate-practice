@@ -1,0 +1,18 @@
+-- ===================================================================================================
+-- PROBLEM 5
+-- ===================================================================================================
+--Description:
+-- Your application searches customers by addresses, ignoring case sensitivity.
+-- The query utilizes an index on the addresse column, but performance still is not great.
+--
+--TODO:
+-- Analyze the query and optimize it for better lookup speed.
+--
+--Query:
+-- SELECT id
+-- FROM customers
+-- WHERE LOWER(addresses) = 'davis street, city, country';
+-- ===================================================================================================
+-- WORKING AREA
+CREATE INDEX idx_customers_lower_address ON customers(LOWER(address));
+

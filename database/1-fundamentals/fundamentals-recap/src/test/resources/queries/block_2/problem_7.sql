@@ -1,0 +1,26 @@
+-- ===================================================================================================
+-- PROBLEM 7
+-- ===================================================================================================
+--Description:
+-- Your auditing tool scans the transactions table for suspicious withdrawals or transfers made from
+-- high-balance accounts within the last 14 days.
+-- The query joins transactions and accounts, filters based on multiple conditions, and selects frequently accessed columns.
+--
+--TODO:
+-- Diagnose and apply multiple optimizations to reduce latency on this critical workflow.
+--
+--Query:
+-- SELECT t.id, t.account_id, t.amount, t.transaction_date, a.balance
+-- FROM transactions t
+--          JOIN accounts a ON t.account_id = a.id
+-- WHERE t.transaction_type IN ('withdrawal', 'transfer')
+--   AND t.transaction_date > NOW() - INTERVAL '14 days'
+--   AND a.balance > 10000;
+-- ===================================================================================================
+-- WORKING AREA
+CREATE INDEX idx_txn_type_recent_covering
+    ON transactions(transaction_date)
+    INCLUDE (account_id, amount)
+  WHERE transaction_type IN ('withdrawal', 'transfer');
+
+CREATE INDEX idx_accounts_balance ON accounts(balance);
