@@ -14,4 +14,5 @@
 -- WHERE LOWER(addresses) = 'davis street, city, country';
 -- ===================================================================================================
 -- WORKING AREA
+CREATE INDEX idx_customers_lower_address ON customers(LOWER(address));
 

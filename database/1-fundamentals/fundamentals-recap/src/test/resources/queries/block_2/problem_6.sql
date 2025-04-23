@@ -15,4 +15,5 @@
 --   AND created_at > NOW() - INTERVAL '10 days';
 -- ===================================================================================================
 -- WORKING AREA
+CREATE INDEX idx_accounts_type_date_cover ON accounts(account_type, created_at) INCLUDE (id, balance);
 

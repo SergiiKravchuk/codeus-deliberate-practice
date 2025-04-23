@@ -11,7 +11,7 @@
 BEGIN;
 ----------------------------------
 --WORKING AREA
-
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED ;
 --WORKING AREA
 ------------------------------------
     UPDATE accounts

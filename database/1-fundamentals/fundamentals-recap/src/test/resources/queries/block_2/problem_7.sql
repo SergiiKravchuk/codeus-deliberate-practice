@@ -18,3 +18,9 @@
 --   AND a.balance > 10000;
 -- ===================================================================================================
 -- WORKING AREA
+CREATE INDEX idx_txn_type_recent_covering
+    ON transactions(transaction_date)
+    INCLUDE (account_id, amount)
+  WHERE transaction_type IN ('withdrawal', 'transfer');
+
+CREATE INDEX idx_accounts_balance ON accounts(balance);

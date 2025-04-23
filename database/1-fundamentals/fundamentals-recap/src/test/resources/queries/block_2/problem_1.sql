@@ -14,3 +14,5 @@
 -- WHERE created_at > NOW() - INTERVAL '10 days';
 -- ===================================================================================================
 -- WORKING AREA 👇
+-- CREATE INDEX idx_accounts_created_at ON accounts(created_at);
+CREATE INDEX idx_accounts_created_at ON accounts(created_at) INCLUDE (id);

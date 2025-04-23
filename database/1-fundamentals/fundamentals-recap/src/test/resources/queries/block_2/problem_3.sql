@@ -13,3 +13,6 @@
 -- WHERE amount > 200 AND transaction_date > NOW() - INTERVAL '15 days';
 -- ===================================================================================================
 -- WORKING AREA
+-- CREATE INDEX idx_txn_amount_and_date ON transactions(amount, transaction_date);
+-- OR
+CREATE INDEX idx_txn_amount_and_date_covering ON transactions(amount, transaction_date) INCLUDE (account_id);

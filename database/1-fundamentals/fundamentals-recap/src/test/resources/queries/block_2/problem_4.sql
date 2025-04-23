@@ -25,3 +25,18 @@
 --     a.id, a.account_type;
 -- ===================================================================================================
 -- WORKING AREA
+CREATE MATERIALIZED VIEW mv_account_monthly_summary AS
+SELECT
+    a.id            AS account_id,
+    a.account_type,
+    COUNT(t.id)     AS transaction_count,
+    SUM(t.amount)   AS total_amount
+FROM
+    accounts a
+JOIN
+    transactions t
+    ON a.id = t.account_id
+WHERE
+    t.transaction_date > NOW() - INTERVAL '30 days'
+GROUP BY
+    a.id, a.account_type;

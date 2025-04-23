@@ -12,7 +12,7 @@
 BEGIN;
 ----------------------------------
 --WORKING AREA
-
+SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 --WORKING AREA
 ----------------------------------
 

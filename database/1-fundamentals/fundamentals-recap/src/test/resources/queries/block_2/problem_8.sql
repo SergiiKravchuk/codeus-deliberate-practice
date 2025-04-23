@@ -14,3 +14,5 @@
 -- WHERE first_name LIKE 'Ann%';
 -- ===================================================================================================
 -- WORKING AREA
+CREATE INDEX idx_customers_first_name_pattern ON customers(first_name text_pattern_ops);
+
