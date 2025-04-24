@@ -167,6 +167,6 @@ public class ProblemSolutionAnalyser {
   }
 
   private boolean isOptimized(Float beforeTime, Float afterTime) {
-    return afterTime < (beforeTime / 5);
+    return afterTime < (beforeTime / 3);
   }
 }
