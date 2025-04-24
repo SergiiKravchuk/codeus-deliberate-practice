@@ -12,7 +12,7 @@ CREATE TABLE customers
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_customers_first_name_pattern ON customers(first_name)
+CREATE INDEX idx_customers_first_name_pattern ON customers(first_name);
 
 --------------------------------------------------------------------------------
 -- Create Accounts table
