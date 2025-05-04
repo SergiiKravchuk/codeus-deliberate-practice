@@ -15,7 +15,7 @@
         <module>common</module>
         <module>setup-example</module>
         <module>1-fundamentals</module>
-        <module>2-advanced</module>
+        <module>2-fundamentals-II</module>
     </modules>
 
     <dependencyManagement>
