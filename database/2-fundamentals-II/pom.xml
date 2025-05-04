@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.codeus</groupId>
+        <artifactId>database</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>2-fundamentals-II</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>1-12-data-types</module>
+        <module>1-13-json-and-full-text-search</module>
+        <module>1-14-basic-triggers</module>
+        <module>1-15-event-triggers</module>
+        <module>1-16-stored-procedures</module>
+        <module>1-17-functions</module>
+        <module>1-18-advanced-join-and-subqueries</module>
+        <module>1-19-security-fundamentals</module>
+        <module>1-20-advanced-indexing-mechanisms</module>
+        <module>1-21-advanced-locking-mechanisms</module>
+        <module>1-22-view-refresh-strategies</module>
+        <module>1-23-advanced-normalization</module>
+        <module>1-24-fundamentals-II-recap</module>
+    </modules>
+
+
+</project>
