@@ -148,7 +148,7 @@ public class TransactionConcurrencyTest {
 
     @Test
     @Order(3)
-    void testReadCommitedPhantomRead() throws IOException, SQLException, InterruptedException, ExecutionException {
+    void testReadCommittedPhantomRead() throws IOException, SQLException, InterruptedException, ExecutionException {
         String readTransaction = Files.readString(Paths.get(getResourcePath(TASK_03_DIR + "3-1-phantom-read-transaction.sql")));
         String updateTransaction = Files.readString(Paths.get(getResourcePath(TASK_03_DIR + "3-2-phantom-read-update-transaction.sql")));
 
@@ -157,20 +157,28 @@ public class TransactionConcurrencyTest {
         List<Map<String, Object>> results = executeQuery(
                 "SELECT * FROM isolation_level_test ORDER BY test_id");
 
-        assertFalse(results.isEmpty(), "You must demonstrate PHANTOM READ anomaly");
+        int expectedNumberOfResults = 2;
+        assertFalse(results.isEmpty() || results.size() != expectedNumberOfResults,
+          "You must demonstrate PHANTOM READ anomaly. Two row results are expected");
 
-        Map<String, Object> repeatableReadResult = findIsolationLevelResult(results, "READ COMMITTED");
-        assertNotNull(repeatableReadResult, "You must include a test for READ COMMITTED isolation level");
+        // Account 2 verification
+        Map<String, Object> accountResult1 = results.get(0);
+        var firstReadBalance1 = convertToDouble(accountResult1.get("first_read"));
+        var secondReadBalance1 = convertToDouble(accountResult1.get("second_read"));
+        assertEquals(firstReadBalance1, secondReadBalance1,
+          "Balance value between read operation should be the same for account " + accountResult1.get("account_id"));
 
-        var firstRead = repeatableReadResult.get("first_read");
-        var secondRead = repeatableReadResult.get("second_read");
-        assertEquals(convertToDouble(firstRead), convertToDouble(secondRead),
-                "READ COMMITTED should demonstrate PHANTOM READ(different values for set)");
+        // Account 4 verification
+        Map<String, Object> accountResult2 = results.get(1);
+        var firstReadBalance2 = convertToDouble(accountResult2.get("first_read"));
+        var secondReadBalance2 = convertToDouble(accountResult2.get("second_read"));
+        assertNotEquals(firstReadBalance2, secondReadBalance2,
+          "Balance value between read operation should be different for account " + accountResult2.get("account_id"));
     }
 
     @Test
     @Order(4)
-    void testReadCommitedSerializableLostUpdate() throws IOException, SQLException, InterruptedException, ExecutionException {
+    void testReadCommittedSerializableLostUpdate() throws IOException, SQLException, InterruptedException, ExecutionException {
         String readTransaction = Files.readString(Paths.get(getResourcePath(TASK_04_DIR + "4-1-non-serialization-transaction.sql")));
         String updateTransaction = Files.readString(Paths.get(getResourcePath(TASK_04_DIR + "4-2-concurrent-update-transaction.sql")));
 
@@ -179,15 +187,24 @@ public class TransactionConcurrencyTest {
         List<Map<String, Object>> results = executeQuery(
                 "SELECT * FROM serialization_test_results ORDER BY result_id");
 
-        assertFalse(results.isEmpty(), "You must demonstrate LOST UPDATE anomaly");
+        int expectedNumberOfResults = 2;
+        assertFalse(results.isEmpty() || results.size() != expectedNumberOfResults,
+          "You must demonstrate LOST UPDATE anomaly. Two row results are expected");
 
         Map<String, Object> repeatableReadResult = findIsolationLevelResult(results, "READ COMMITTED");
-        assertNotNull(repeatableReadResult, "You must include a test for SERIALIZABLE isolation level");
+        assertNotNull(repeatableReadResult, "You must include a test for READ COMMITTED isolation level");
 
-        var firstRead = repeatableReadResult.get("final_balance");
-        var secondRead = repeatableReadResult.get("final_balance");
-        assertEquals(convertToDouble(firstRead), convertToDouble(secondRead),
-                "REPEATABLE READ should demonstrate SERIALISATION ANOMALY(values of final transaction should be less than 1500)");
+        // Transaction 1 result verification
+        Map<String, Object> transactionResult1 = results.get(1);
+        var finalBalance1 = convertToDouble(transactionResult1.get("final_balance"));
+        assertEquals(-1000.0, finalBalance1,
+          "Final balance value of the 1st transaction should be invalid (negative number)");
+
+        // Transaction 2 result verification
+        Map<String, Object> transactionResult2 = results.get(0);
+        var finalBalance2 = convertToDouble(transactionResult2.get("final_balance"));
+        assertEquals(500.0, finalBalance2,
+          "Final balance value of the 2st transaction should be valid");
     }
 
     @Test
