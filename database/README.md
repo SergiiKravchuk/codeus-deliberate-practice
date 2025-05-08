@@ -132,9 +132,9 @@ Each module has multiple submodules that are listed in groups below.
   <summary>1.11 Fundamentals I recap</summary>
 👉 **Solve problems and verify your knowledge**
 
-1. Check [readme.md](1-fundamentals%2Ffundamentals-recap%2Freadme.md);
-2. Solve problems from [queries](1-fundamentals%2Ffundamentals-recap%2Fsrc%2Ftest%2Fresources%2Fqueries);
-3. Check your solution implementation using [SqlQueriesTest.java](1-fundamentals%2Ffundamentals-recap%2Fsrc%2Ftest%2Fjava%2Forg%2Fcodeus%2Fdatabase%2Ffundamentals%2Frecap%2FSqlQueriesTest.java).
+1. Check [readme.md](1-fundamentals%2F1-11-fundamentals-I-recap%2Freadme.md);
+2. Solve problems from [queries](1-fundamentals%2F1-11-fundamentals-I-recap%2Fsrc%2Ftest%2Fresources%2Fqueries);
+3. Check your solution implementation using [SqlQueriesTest.java](1-fundamentals%2F1-11-fundamentals-I-recap%2Fsrc%2Ftest%2Fjava%2Forg%2Fcodeus%2Fdatabase%2Ffundamentals%2Frecap%2FSqlQueriesTest.java).
 
 💡 The implemented solution can be found on the `master-completed` branch.
 </details>

@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>fundamentals-recap</artifactId>
+    <artifactId>1-11-fundamentals-I-recap</artifactId>
 
     <dependencies>
         <dependency>
