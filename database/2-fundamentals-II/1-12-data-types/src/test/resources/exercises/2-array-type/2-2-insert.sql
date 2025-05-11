@@ -1,0 +1,13 @@
+-- ===================================================================================================
+-- EXERCISE 2.2 Insert data using the new ARRAY type
+-- ===================================================================================================
+-- Description:
+--  Insert new rows into `customers` populating `tags`.
+-- Sample Data:
+--  1. id: 101, first_name: 'Alice', last_name: 'Smith', email:'alice.smith@example.com', phone: '1111111111',address: '123 Apple St' tags: 'premium','newsletter'
+--  2. id: 102, first_name: 'Bob', last_name: 'Jones', email:'bob.jones@example.com', phone: '2222222222',address: '456 Berry Rd' tags: 'new','trial'
+--  3. id: 103, first_name: 'Carol', last_name: 'Lee', email:'carol.lee@example.com', phone: '3333333333',address: '789 Cherry Ave' tags: 'premium'
+--  4. id: 104, first_name: 'Dave', last_name: 'Kim', email:'dave.kim@example.com', phone: '4444444444',address: '101 Date Blvd' tags: <empty>
+--  5. id: 105, first_name: 'Eve', last_name: 'Brown', email:'eve.brown@example.com', phone: '5555555555',address: '202 Elm St' tags: 'loyal','premium','vip'
+-- ===================================================================================================
+-- WORKING AREA 👇

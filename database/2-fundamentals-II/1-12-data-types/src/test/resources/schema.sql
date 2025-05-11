@@ -7,7 +7,7 @@ CREATE TABLE customers
     first_name VARCHAR(50)         NOT NULL,
     last_name  VARCHAR(50)         NOT NULL,
     email      VARCHAR(100) UNIQUE NOT NULL,
-    phone      VARCHAR(20) UNIQUE  NOT NULL,
+    phone      VARCHAR(20) UNIQUE,
     address    TEXT                NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -37,51 +37,3 @@ CREATE TABLE transactions
     transaction_date  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     target_account_id INT                                                                           REFERENCES accounts (id) ON DELETE SET NULL
 );
-
---------------------------------------------------------------------------------
--- Create Loans table
---------------------------------------------------------------------------------
-CREATE TABLE loans
-(
-    id            SERIAL PRIMARY KEY,
-    customer_id   INT                                                             NOT NULL,
-    amount        DECIMAL(15, 2)                                                  NOT NULL,
-    interest_rate DECIMAL(5, 2)                                                   NOT NULL,
-    term_months   INT                                                             NOT NULL,
-    status        VARCHAR(20) CHECK (status IN ('active', 'closed', 'defaulted')) NOT NULL DEFAULT 'active',
-    created_at    TIMESTAMP                                                                DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE CASCADE
-);
-
---------------------------------------------------------------------------------
--- Step 1: Create Branches table WITHOUT manager_id
---------------------------------------------------------------------------------
-CREATE TABLE branches
-(
-    id         SERIAL PRIMARY KEY,
-    name       VARCHAR(100) NOT NULL,
-    location   TEXT         NOT NULL,
-    phone      VARCHAR(20)  NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
---------------------------------------------------------------------------------
--- Step 2: Create Employees table
---------------------------------------------------------------------------------
-CREATE TABLE employees
-(
-    id         SERIAL PRIMARY KEY,
-    first_name VARCHAR(50)    NOT NULL,
-    last_name  VARCHAR(50)    NOT NULL,
-    position   VARCHAR(50)    NOT NULL,
-    salary     DECIMAL(10, 2) NOT NULL,
-    branch_id  INT            REFERENCES branches (id) ON DELETE SET NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
---------------------------------------------------------------------------------
--- Step 3: Add manager_id to Branches table AFTER Employees exists
---------------------------------------------------------------------------------
-ALTER TABLE branches
-    ADD COLUMN manager_id INT UNIQUE,
-    ADD CONSTRAINT fk_manager FOREIGN KEY (manager_id) REFERENCES employees (id) ON DELETE SET NULL;
