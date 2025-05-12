@@ -11,9 +11,22 @@
 --      - `query_text` should be the text of the query that caused the trigger to fire (Hint: use the `current_query()` function). https://www.postgresql.org/docs/current/functions-info.html
 --    - Return NULL (the return value for a BEFORE statement trigger is ignored, but the function must return type TRIGGER).
 
+CREATE OR REPLACE FUNCTION log_customer_insert_attempt_statement()
+    RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO audit_logs (operation_type, table_name, query_text)
+    VALUES (TG_OP, TG_TABLE_NAME, current_query());
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
 
 -- 2. Create a trigger named `trg_before_customer_insert_statement_log`.
 --    This trigger should:
 --    - Execute BEFORE any INSERT operation on the `customers` table.
 --    - Fire FOR EACH STATEMENT.
 --    - Call the `log_customer_insert_attempt_statement` function.
+CREATE TRIGGER trg_before_customer_insert_statement_log
+    BEFORE INSERT ON customers
+    FOR EACH STATEMENT
+EXECUTE FUNCTION log_customer_insert_attempt_statement();
