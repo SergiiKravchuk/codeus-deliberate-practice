@@ -11,3 +11,10 @@
 --  5. account_id: 205, credit_limit: from inclusive 100 to inclusive 200
 -- ===================================================================================================
 -- WORKING AREA 👇
+
+INSERT INTO accounts(id, customer_id, account_type, balance, credit_limit) VALUES
+                                                                               (201,1,'checking',0.00,'[0,10000)'),
+                                                                               (202,2,'savings',0.00,'[500,5000]'),
+                                                                               (203,3,'checking',0.00,'(1000,15000)'),
+                                                                               (204,4,'savings',0.00,'[0,0]'),
+                                                                               (205,5,'checking',0.00,'[100,200]');

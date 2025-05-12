@@ -7,3 +7,6 @@
 
 -- ===================================================================================================
 -- WORKING AREA 👇
+CREATE TYPE account_status AS ENUM ('active','inactive','closed');
+ALTER TABLE accounts
+    ADD COLUMN status account_status NOT NULL DEFAULT 'active';

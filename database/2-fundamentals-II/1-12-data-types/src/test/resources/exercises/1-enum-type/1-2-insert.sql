@@ -12,3 +12,10 @@
 --  5. account_id: 105, customer_id: 8, account_type: 'checking', balance: 750.75, status: 'inactive'
 -- ===================================================================================================
 -- WORKING AREA 👇
+
+INSERT INTO accounts(id, customer_id, account_type, balance, status) VALUES
+                                                                         (101, 5, 'checking', 100.00, 'active'),
+                                                                         (102, 6, 'savings', 2500.50, 'inactive'),
+                                                                         (103, 7, 'checking', 0.00, 'closed'),
+                                                                         (104, 5, 'savings', 500.00, 'active'),
+                                                                         (105, 8, 'checking', 750.75, 'inactive');

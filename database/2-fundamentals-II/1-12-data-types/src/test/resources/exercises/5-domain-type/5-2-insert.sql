@@ -12,6 +12,12 @@
 -- ===================================================================================================
 -- WORKING AREA 👇
 
+INSERT INTO customers(id, first_name, last_name, email, local_phone, address) VALUES
+                                                                            (106,'Frank','Green','frank.green@example.com','1234567890','303 Fir St'),
+                                                                            (107,'Grace','Hall','grace.hall@example.com','0987654321','404 Gum Rd'),
+                                                                            (108,'Hank','Ivy','hank.ivy@example.com','5555555555','505 Holly Ave'),
+                                                                            (109,'Irene','Jones','irene.jones@example.com','1112223333','606 Ivy Blvd'),
+                                                                            (110,'Jack','King','jack.king@example.com','9998887777','707 Juniper Ln');
 
 
 

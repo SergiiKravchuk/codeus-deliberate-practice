@@ -5,3 +5,5 @@
 --  Alter the `customers` table to add a column `tags` of type TEXT[].
 -- ===================================================================================================
 -- WORKING AREA 👇
+ALTER TABLE customers
+    ADD COLUMN tags TEXT[];

@@ -7,3 +7,8 @@
 -- ===================================================================================================
 -- WORKING AREA 👇
 
+ALTER TYPE account_status ADD VALUE 'suspended';
+COMMIT;
+UPDATE accounts
+SET status = 'suspended'
+WHERE id = 101;

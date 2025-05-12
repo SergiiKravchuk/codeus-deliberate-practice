@@ -11,3 +11,9 @@
 --  5. id: 105, first_name: 'Eve', last_name: 'Brown', email:'eve.brown@example.com', phone: '5555555555',address: '202 Elm St' tags: 'loyal','premium','vip'
 -- ===================================================================================================
 -- WORKING AREA 👇
+INSERT INTO customers(id, first_name, last_name, email, phone, address, tags) VALUES
+                                                                                  (101,'Alice','Smith','alice.smith@example.com','1111111111','123 Apple St','{ "premium","newsletter" }'),
+                                                                                  (102,'Bob','Jones','bob.jones@example.com','2222222222','456 Berry Rd','{ "new","trial" }'),
+                                                                                  (103,'Carol','Lee','carol.lee@example.com','3333333333','789 Cherry Ave','{ "premium" }'),
+                                                                                  (104,'Dave','Kim','dave.kim@example.com','4444444444','101 Date Blvd',ARRAY[]::TEXT[]),
+                                                                                  (105,'Eve','Brown','eve.brown@example.com','5555555555','202 Elm St','{ "loyal","premium","vip" }');
