@@ -3,6 +3,6 @@
 -- ===================================================================================================
 -- Description:
 --  Create a DOMAIN `us_phone` based on VARCHAR(20) enforcing exactly 10 digits and
---  alter `customers.phone` to use the `us_phone` domain.
+--  alter `customers` table and add a new column `local_phone` to use the `us_phone` domain.
 -- ===================================================================================================
 -- WORKING AREA 👇

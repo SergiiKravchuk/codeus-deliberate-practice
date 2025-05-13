@@ -4,10 +4,10 @@
 -- Description:
 --  Insert new rows into `accounts` setting `credit_limit`.
 -- Sample Data:
---  1. id: 201, credit_limit: from inclusive 0 to exclusive 10000
---  2. id: 202, credit_limit: from inclusive 500 to inclusive 5000
---  3. id: 203, credit_limit: from exclusive 1000 to exclusive 15000
---  4. id: 204, credit_limit: from inclusive 0 to inclusive 0
---  5. id: 205, credit_limit: from inclusive 100 to inclusive 200
+--  1. id: 201, customer_id: 1, account_type: 'checking', balance: 0.00, credit_limit: from inclusive 0 to exclusive 10000
+--  2. id: 202, customer_id: 2, account_type: 'savings', balance: 0.00, credit_limit: from inclusive 500 to inclusive 5000
+--  3. id: 203, customer_id: 3, account_type: 'checking', balance: 0.00, credit_limit: from exclusive 1000 to exclusive 15000
+--  4. id: 204, customer_id: 4, account_type: 'savings', balance: 0.00, credit_limit: from inclusive 0 to inclusive 0
+--  5. id: 205, customer_id: 5, account_type: 'checking', balance: 0.00, credit_limit: from inclusive 100 to inclusive 200
 -- ===================================================================================================
 -- WORKING AREA 👇
