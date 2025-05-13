@@ -1,0 +1,28 @@
+-- ====================================================================================================================
+-- OPTIONAL TASK 10: Get Customer Account Numbers as Array
+-- File: 10_get_customer_account_numbers_array.sql
+-- ====================================================================================================================
+-- Objective: Retrieve all account numbers for a specific customer as a text array.
+--            This task introduces working with array data types and aggregation.
+--
+-- Function Signature to implement:
+--   Name: get_customer_account_numbers_array
+--   Input Parameter: p_customer_id INT
+--   Return Type: TEXT[] (an array of account numbers, using account.id as TEXT)
+--
+-- Logic:
+-- 1. Declare a BOOLEAN variable `v_customer_exists`.
+-- 2. Declare a TEXT[] variable `v_account_ids_as_text`.
+-- 3. Check if the customer `p_customer_id` exists. If not, return an empty array (`'{}'::TEXT[]`).
+-- 4. Use `array_agg(a.id::TEXT ORDER BY a.id)` from the `accounts` table (alias `a`)
+--    for the given `p_customer_id`, and store it into `v_account_ids_as_text`.
+--    (Schema Adaptation: Using `a.id::TEXT` as `account_number` column is not in schema).
+-- 5. Use `COALESCE` with `array_agg` to ensure an empty array (`'{}'::TEXT[]`) is returned
+--    if the customer has no accounts (which would make `array_agg` return NULL).
+-- 6. Return `v_account_ids_as_text`.
+--
+-- Example Usage (after creation, for understanding):
+--   SELECT get_customer_account_numbers_array(1);
+-- ====================================================================================================================
+
+-- TODO: Implement the complete function definition for 'get_customer_account_numbers_array' below.

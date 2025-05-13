@@ -1,0 +1,28 @@
+-- ====================================================================================================================
+-- TASK 1: Get Customer Email by ID
+-- File: 01_get_customer_email.sql
+-- ====================================================================================================================
+-- Objective: Basic function structure, parameter handling, a simple SELECT INTO statement
+--            for a single variable, and basic error checking using the FOUND variable.
+--
+-- Function Signature to implement:
+--   Name: get_customer_email
+--   Input Parameter: p_customer_id INT
+--   Return Type: TEXT
+--
+-- Logic:
+-- 1. Declare a TEXT variable `v_email` to store the customer's email.
+-- 2. Query the `customers` table to retrieve the `email` for the given `p_customer_id`.
+--    Store the result into the `v_email` variable using `SELECT INTO`.
+-- 3. Error Handling: If no customer is found for `p_customer_id` (check the `FOUND`
+--    special variable immediately after `SELECT INTO`), the function should raise an
+--    exception with the message 'Customer not found: %', where % is p_customer_id.
+-- 4. Return the retrieved `v_email`.
+--
+-- Example Usage (after creation, for understanding):
+--   SELECT get_customer_email(1);
+-- ====================================================================================================================
+
+-- TODO: Implement the complete function definition for 'get_customer_email' below.
+-- This includes the CREATE OR REPLACE FUNCTION statement, parameter definitions,
+-- RETURNS clause, AS $$ DECLARE ... BEGIN ... END; $$ LANGUAGE plpgsql; structure.

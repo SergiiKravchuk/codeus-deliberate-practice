@@ -1,0 +1,38 @@
+-- ====================================================================================================================
+-- OPTIONAL TASK 11: Format Loan Details String
+-- File: 11_format_loan_details.sql
+-- ====================================================================================================================
+-- Objective: Fetch details for a specific loan, potentially joining with other tables,
+--            and format them into a comprehensive, human-readable string.
+--
+-- Function Signature to implement:
+--   Name: format_loan_details
+--   Input Parameter: p_loan_id INT
+--   Return Type: TEXT
+--
+-- Logic:
+-- 1. Declare a RECORD variable `v_loan_details_record`.
+-- 2. Declare TEXT variables `v_formatted_string` and `v_customer_name`.
+-- 3. Declare a NUMERIC variable `v_rate_display`.
+-- 4. Query to retrieve loan details by joining `loans` (alias `l`) and `customers` (alias `c`)
+--    on `l.customer_id = c.id`. Fetch `l.id AS loan_id`, `l.amount AS loan_amount`, `l.interest_rate`,
+--    `l.term_months`, `l.status AS loan_status`, `l.created_at AS start_date`, `c.first_name`, `c.last_name`.
+--    Store the result into `v_loan_details_record` using `SELECT INTO`.
+--    (Schema Adaptation: The `loans` table in `schema.sql` does not have a `monthly_payment` column, so it's omitted from fetching and formatting).
+-- 5. If `NOT FOUND` after `SELECT INTO`, return 'Loan not found.'.
+-- 6. Construct `v_customer_name` by concatenating `first_name` and `last_name` from the record,
+--    handling potential NULLs (e.g., using `trim(COALESCE(v_loan_details_record.first_name, '') || ' ' || COALESCE(v_loan_details_record.last_name, ''))`).
+--    If `v_customer_name` is empty after trimming, set it to 'N/A'.
+-- 7. Assign `v_loan_details_record.interest_rate` to `v_rate_display`. Handle NULL `interest_rate` by defaulting to 0.
+--    (Note: `interest_rate` from the table is assumed to be the direct percentage value, e.g., 5.5 for 5.5%, not a decimal like 0.055).
+-- 8. Construct `v_formatted_string` using the `format()` function with details from `v_loan_details_record`.
+--    Use `COALESCE` for each argument passed to `format()` to handle potential NULLs by replacing them with 'N/A' or a suitable default.
+--    The date is formatted using `to_char` with the template 'YYYY-MM-DD' (e.g., to output a date like 2023-04-01).
+--    Example format string for `format()`: 'Loan ID: %s for Customer: %s - Amount: $%s at %s%% for %s months. Status: %s. Started: %s.'
+-- 9. Return `v_formatted_string`.
+--
+-- Example Usage (after creation, for understanding):
+--   SELECT format_loan_details(1);
+-- ====================================================================================================================
+
+-- TODO: Implement the complete function definition for 'format_loan_details' below.

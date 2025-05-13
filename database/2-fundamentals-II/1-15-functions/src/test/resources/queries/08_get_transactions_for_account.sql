@@ -1,0 +1,33 @@
+-- ====================================================================================================================
+-- TASK 8: Get Transactions for Account (SRF)
+-- File: 08_get_transactions_for_account.sql
+-- ====================================================================================================================
+-- Objective: Create a function that returns a set of rows (like a table) containing
+--            transaction details for a specific account.
+--
+-- Function Signature to implement:
+--   Name: get_transactions_for_account
+--   Input Parameter: p_account_id INT
+--   Return Type: TABLE (
+--                    transaction_id INT,
+--                    transaction_type TEXT,
+--                    amount NUMERIC,
+--                    transaction_date TIMESTAMP,
+--                    description TEXT
+--                )
+--
+-- Logic:
+-- 1. (Optional but good practice) You might first check if the account `p_account_id` exists.
+--    If not, the `RETURN QUERY` will naturally return an empty set if no matching account_id is found in transactions.
+-- 2. Use `RETURN QUERY` to execute a `SELECT` statement that retrieves `id` (as transaction_id),
+--    `transaction_type` (cast to TEXT if it's VARCHAR in the table), `amount`, `transaction_date`,
+--    and `description` from the `transactions` table for the given `p_account_id`.
+--    (Schema Adaptation: If the 'transactions' table in the schema.sql does not have a 'description' column,
+--     this function should return NULL for the 'description' field, e.g., by selecting NULL::TEXT AS description).
+-- 3. Order the results by `transaction_date` in descending order.
+--
+-- Example Usage (after creation, for understanding):
+--   SELECT * FROM get_transactions_for_account(1);
+-- ====================================================================================================================
+
+-- TODO: Implement the complete function definition for 'get_transactions_for_account' below.

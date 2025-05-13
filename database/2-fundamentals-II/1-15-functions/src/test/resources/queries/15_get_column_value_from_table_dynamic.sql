@@ -1,0 +1,42 @@
+-- ====================================================================================================================
+-- OPTIONAL TASK 15: Get Column Value Dynamically (EXECUTE format)
+-- File: 15_get_column_value_from_table_dynamic.sql
+-- ====================================================================================================================
+-- Objective: Introduce dynamic SQL using `EXECUTE` and `format()` for constructing queries.
+--            **WARNING: Use dynamic SQL with extreme caution due to SQL injection risks.**
+--            This task is for educational purposes to demonstrate the capability.
+--
+-- Function Signature to implement:
+--   Name: get_column_value_from_table_dynamic
+--   Input Parameters:
+--     p_table_name TEXT,       -- Name of the table (e.g., 'customers', 'accounts')
+--     p_column_name TEXT,      -- Name of the column to retrieve (e.g., 'email', 'balance')
+--     p_id_column_name TEXT,   -- Name of the ID column for the WHERE clause (e.g., 'id')
+--     p_id_value INT           -- Value of the ID to filter by (e.g., 1, 2)
+--   Return Type: TEXT          -- The value of the requested column, cast to TEXT
+--
+-- Logic:
+-- 1. Declare a TEXT variable `v_query_string` to hold the dynamically constructed query.
+-- 2. Declare a TEXT variable `v_result_value` to store the result of the dynamic query.
+-- 3. Construct `v_query_string` using `format()`.
+--    - Use `%I` (Identifier) format specifier for `p_table_name`, `p_column_name`, and `p_id_column_name`
+--      to ensure proper quoting of these identifiers and help prevent SQL injection.
+--    - Use `%L` (Literal) format specifier for the `p_id_value` to ensure it's safely quoted as a literal.
+--    - Example query structure: `format('SELECT %I::TEXT FROM %I WHERE %I = %L LIMIT 1', p_column_name, p_table_name, p_id_column_name, p_id_value)`
+--      (Casting the selected column to TEXT ensures compatibility with the function's return type).
+-- 4. Execute the `v_query_string` using `EXECUTE query_string INTO v_result_value`.
+-- 5. Error Handling: Use an `EXCEPTION WHEN OTHERS` block to catch any errors during dynamic SQL execution
+--    (e.g., table/column not found, type mismatch, no data found for the ID).
+--    If an error occurs, `RAISE NOTICE` with the error message (`SQLERRM`) and set `v_result_value` to NULL.
+-- 6. Return `v_result_value`.
+-- 7. **Important Note:** In real-world applications, all inputs used to construct
+--    dynamic SQL (especially table and column names received from users or external sources)
+--    must be rigorously validated against a whitelist or schema information (e.g., `information_schema`)
+--    to prevent SQL injection vulnerabilities. This example is simplified for educational purposes.
+--
+-- Example Usage (after creation, for understanding):
+--   SELECT get_column_value_from_table_dynamic('customers', 'email', 'id', 1); -- Corrected p_id_column_name
+--   SELECT get_column_value_from_table_dynamic('accounts', 'balance', 'id', 2); -- Corrected p_id_column_name
+-- ====================================================================================================================
+
+-- TODO: Implement the complete function definition for 'get_column_value_from_table_dynamic' below.

@@ -1,0 +1,28 @@
+-- ====================================================================================================================
+-- TASK 2: Get Customer Full Name
+-- File: 02_get_customer_full_name.sql
+-- ====================================================================================================================
+-- Objective: Practice SELECT INTO for multiple variables, string concatenation, and error handling.
+--
+-- Function Signature to implement:
+--   Name: get_customer_full_name
+--   Input Parameter: p_customer_id INT
+--   Return Type: TEXT
+--
+-- Logic:
+-- 1. Declare three TEXT variables: `v_first_name`, `v_last_name`, and `v_full_name`.
+-- 2. Query the `customers` table to retrieve `first_name` and `last_name` for the given `p_customer_id`.
+--    Store these into the `v_first_name` and `v_last_name` variables using `SELECT INTO`.
+-- 3. Error Handling: If no customer is found (check `FOUND`), raise an exception: 'Customer not found: %'.
+-- 4. Concatenate `v_first_name`, a space, and `v_last_name` assign the result to `v_full_name`.
+--    Handle potential NULLs in `v_first_name` or `v_last_name` gracefully (e.g., if one is NULL,
+--    the full name should still be formed correctly with the non-NULL part, or return NULL if both are NULL).
+--    A simple approach is `v_full_name := trim(COALESCE(v_first_name, '') || ' ' || COALESCE(v_last_name, ''));`
+--    If the result is an empty string after trimming (both names were NULL or empty), consider returning NULL.
+-- 5. Return `v_full_name`.
+--
+-- Example Usage (after creation, for understanding):
+--   SELECT get_customer_full_name(1);
+-- ====================================================================================================================
+
+-- TODO: Implement the complete function definition for 'get_customer_full_name' below.

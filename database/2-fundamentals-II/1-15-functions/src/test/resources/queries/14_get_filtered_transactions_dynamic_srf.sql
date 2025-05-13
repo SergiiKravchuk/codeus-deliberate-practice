@@ -1,0 +1,29 @@
+-- ====================================================================================================================
+-- OPTIONAL TASK 14: Get Filtered Transactions (Dynamic SRF with SETOF RECORD)
+-- File: 14_get_filtered_transactions_dynamic_srf.sql
+-- ====================================================================================================================
+-- Objective: Create a Set-Returning Function using `SETOF RECORD` where the calling
+--            query defines the output column structure. This allows flexibility for the caller.
+--
+-- Function Signature to implement:
+--   Name: get_filtered_transactions_dynamic_srf
+--   Input Parameters: p_account_id INT, p_min_amount NUMERIC DEFAULT 0.00
+--   Return Type: SETOF RECORD
+--
+-- Logic:
+-- 1. Use `RETURN QUERY` to execute a `SELECT` statement that retrieves `id` (implicitly the transaction_id),
+--    `transaction_type` (explicitly cast to TEXT for consistency), `amount`, and `transaction_date`
+--    from the `transactions` table (aliased as t) for the given `p_account_id` where `amount > p_min_amount`.
+-- 2. Order the results by `transaction_date` descending to show the most recent transactions first.
+-- 3. The caller of this function MUST provide a column definition list (an `AS` clause with column names and types)
+--    to specify the structure of the returned records, as `SETOF RECORD` returns an untyped set of records.
+--
+-- Example Usage (after creation, for understanding):
+--   SELECT * FROM get_filtered_transactions_dynamic_srf(1, 50.00)
+--   AS (tx_id INT, type TEXT, value NUMERIC, tx_time TIMESTAMP);
+--
+--   SELECT * FROM get_filtered_transactions_dynamic_srf(3, 100.00)
+--   AS (transaction_no INT, category TEXT, "value" NUMERIC, "when" TIMESTAMP); -- Different alias example
+-- ====================================================================================================================
+
+-- TODO: Implement the complete function definition for 'get_filtered_transactions_dynamic_srf' below.

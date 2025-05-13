@@ -1,0 +1,25 @@
+-- ====================================================================================================================
+-- TASK 7: Count Transactions by Type for Account
+-- File: 07_count_transactions_by_type_for_account.sql
+-- ====================================================================================================================
+-- Objective: Using COUNT(*) aggregate with multiple WHERE conditions.
+--
+-- Function Signature to implement:
+--   Name: count_transactions_by_type_for_account
+--   Input Parameters: p_account_id INT, p_transaction_type TEXT
+--   Return Type: INT
+--
+-- Logic:
+-- 1. Declare an INT variable `v_transaction_count`.
+-- 2. Declare a BOOLEAN variable `v_account_exists`.
+-- 3. Check if the account `p_account_id` exists. Store result in `v_account_exists`.
+-- 4. If `v_account_exists` is false, return 0.
+-- 5. Query the `transactions` table to `COUNT(*)` into `v_transaction_count` where `account_id` matches `p_account_id`
+--    AND `transaction_type` matches `p_transaction_type`.
+-- 6. Return `v_transaction_count`.
+--
+-- Example Usage (after creation, for understanding):
+--   SELECT count_transactions_by_type_for_account(1, 'Deposit');
+-- ====================================================================================================================
+
+-- TODO: Implement the complete function definition for 'count_transactions_by_type_for_account' below.
