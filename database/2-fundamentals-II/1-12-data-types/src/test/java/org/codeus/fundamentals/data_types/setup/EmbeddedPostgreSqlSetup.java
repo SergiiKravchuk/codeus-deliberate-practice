@@ -63,6 +63,7 @@ public abstract class EmbeddedPostgreSqlSetup {
     // Load test data
     executeQueryWithoutResultFromFile(TEST_DATA_FILE);
 
+    connection.commit();
     System.out.println("Setup complete");
   }
 

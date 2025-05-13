@@ -8,8 +8,7 @@ import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
 public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
@@ -43,18 +42,23 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
     @Test
     @Order(5)
     void testInsertEnum() throws Exception {
-      // count rows before  
-      ResultSet before = connection.createStatement().executeQuery("SELECT COUNT(*) FROM accounts");
-      before.next();
-      int countBefore = before.getInt(1);
+      try {
+        // count rows before
+        ResultSet before = connection.createStatement().executeQuery("SELECT COUNT(*) FROM accounts");
+        before.next();
+        int countBefore = before.getInt(1);
 
-      executeQueryWithoutResultFromFile(MAIN_DIR + EXEC_DIR + "1-2-insert.sql");
+        executeQueryWithoutResultFromFile(MAIN_DIR + EXEC_DIR + "1-2-insert.sql");
 
-      ResultSet after = connection.createStatement().executeQuery("SELECT COUNT(*) FROM accounts");
-      after.next();
-      int countAfter = after.getInt(1);
+        ResultSet after = connection.createStatement().executeQuery("SELECT COUNT(*) FROM accounts");
+        after.next();
+        int countAfter = after.getInt(1);
 
-      assertEquals(countBefore + 5, countAfter, "Five new accounts should be inserted");
+        assertEquals(countBefore + 5, countAfter, "Five new accounts should be inserted");
+      } catch (Exception e) {
+        connection.rollback();
+        fail(e);
+      }
     }
 
     @Test
@@ -105,17 +109,22 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
     @Test
     @Order(5)
     void testInsertArray() throws Exception {
-      ResultSet before = connection.createStatement().executeQuery("SELECT COUNT(*) FROM customers");
-      before.next();
-      int countBefore = before.getInt(1);
+      try {
+        ResultSet before = connection.createStatement().executeQuery("SELECT COUNT(*) FROM customers");
+        before.next();
+        int countBefore = before.getInt(1);
 
-      executeQueryWithoutResultFromFile(MAIN_DIR + EXEC_DIR + "2-2-insert.sql");
+        executeQueryWithoutResultFromFile(MAIN_DIR + EXEC_DIR + "2-2-insert.sql");
 
-      ResultSet after = connection.createStatement().executeQuery("SELECT COUNT(*) FROM customers");
-      after.next();
-      int countAfter = after.getInt(1);
+        ResultSet after = connection.createStatement().executeQuery("SELECT COUNT(*) FROM customers");
+        after.next();
+        int countAfter = after.getInt(1);
 
-      assertEquals(countBefore + 5, countAfter, "Five new customers should be inserted");
+        assertEquals(countBefore + 5, countAfter, "Five new customers should be inserted");
+      } catch (Exception e) {
+        connection.rollback();
+        fail(e);
+      }
     }
 
     @Test
@@ -152,14 +161,19 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
     @Test
     @Order(5)
     void testInsertRange() throws Exception {
-      ResultSet before = connection.createStatement().executeQuery("SELECT COUNT(*) FROM accounts");
-      before.next();
-      int b = before.getInt(1);
-      executeQueryWithoutResultFromFile(MAIN_DIR + EXEC_DIR + "3-2-insert.sql");
-      ResultSet after = connection.createStatement().executeQuery("SELECT COUNT(*) FROM accounts");
-      after.next();
-      int a = after.getInt(1);
-      assertEquals(b + 5, a);
+      try {
+        ResultSet before = connection.createStatement().executeQuery("SELECT COUNT(*) FROM accounts");
+        before.next();
+        int b = before.getInt(1);
+        executeQueryWithoutResultFromFile(MAIN_DIR + EXEC_DIR + "3-2-insert.sql");
+        ResultSet after = connection.createStatement().executeQuery("SELECT COUNT(*) FROM accounts");
+        after.next();
+        int a = after.getInt(1);
+        assertEquals(b + 5, a);
+      } catch (Exception e) {
+        connection.rollback();
+        fail(e);
+      }
     }
 
     @Test
@@ -249,14 +263,19 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
     @Test
     @Order(5)
     void testInsertDomain() throws Exception {
-      ResultSet before = connection.createStatement().executeQuery("SELECT COUNT(*) FROM customers");
-      before.next();
-      int b = before.getInt(1);
-      executeQueryWithoutResultFromFile(MAIN_DIR + EXEC_DIR + "5-2-insert.sql");
-      ResultSet after = connection.createStatement().executeQuery("SELECT COUNT(*) FROM customers");
-      after.next();
-      int a = after.getInt(1);
-      assertEquals(b + 5, a);
+      try {
+        ResultSet before = connection.createStatement().executeQuery("SELECT COUNT(*) FROM customers");
+        before.next();
+        int b = before.getInt(1);
+        executeQueryWithoutResultFromFile(MAIN_DIR + EXEC_DIR + "5-2-insert.sql");
+        ResultSet after = connection.createStatement().executeQuery("SELECT COUNT(*) FROM customers");
+        after.next();
+        int a = after.getInt(1);
+        assertEquals(b + 5, a);
+      } catch (Exception e) {
+        connection.rollback();
+        fail(e);
+      }
     }
 
     @Test
