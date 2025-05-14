@@ -1,0 +1,14 @@
+-- ===================================================================================================
+-- EXERCISE 2.2 Search by value
+-- ===================================================================================================
+-- Description:
+-- Search for title and details for the 'France' country record
+-- Use ->> syntax
+
+-- ===================================================================================================
+-- WORKING AREA 👇
+
+SELECT title, details
+FROM history_facts
+WHERE details ->> 'country' = 'France';
+
