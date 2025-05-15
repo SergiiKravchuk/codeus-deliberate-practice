@@ -141,7 +141,7 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlFullTextSearchSetup {
       String taskFile = "queries/01_06_create_gin_index.sql";
       setupSchema("schema.sql", "test-data.sql");
       final String sql = getSqlRequestFromFilePath(taskFile);
-      if (!sql.contains("WHERE body @@ to_tsquery")) {
+      if (!sql.contains("body @@ to_tsquery")) {
         fail("Please use body with to_tsquery lookup");
       }
       final String[] commands = sql.split(";");
