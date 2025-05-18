@@ -23,3 +23,21 @@
 -- ====================================================================================================================
 
 -- TODO: Implement the complete function definition for 'get_account_balance' below.
+
+CREATE OR REPLACE FUNCTION get_account_balance(p_account_id INT)
+RETURNS NUMERIC AS $$
+DECLARE
+    v_balance NUMERIC;
+BEGIN
+    SELECT balance
+    INTO v_balance
+    FROM accounts
+    WHERE id = p_account_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Account not found: %', p_account_id;
+    END IF;
+
+    RETURN v_balance;
+END;
+$$ LANGUAGE plpgsql;

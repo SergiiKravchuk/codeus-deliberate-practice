@@ -31,3 +31,25 @@
 -- ====================================================================================================================
 
 -- TODO: Implement the complete function definition for 'get_transactions_for_account' below.
+
+CREATE OR REPLACE FUNCTION get_transactions_for_account(p_account_id INT)
+RETURNS TABLE (
+    transaction_id INT,
+    transaction_type TEXT,
+    amount NUMERIC,
+    transaction_date TIMESTAMP,
+    description TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        t.id,
+        t.transaction_type::TEXT,
+        t.amount,
+        t.transaction_date,
+        NULL::TEXT
+    FROM transactions t
+    WHERE t.account_id = p_account_id
+    ORDER BY t.transaction_date DESC;
+END;
+$$ LANGUAGE plpgsql;

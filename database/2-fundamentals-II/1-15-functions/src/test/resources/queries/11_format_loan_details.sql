@@ -36,3 +36,55 @@
 -- ====================================================================================================================
 
 -- TODO: Implement the complete function definition for 'format_loan_details' below.
+
+CREATE OR REPLACE FUNCTION format_loan_details(p_loan_id INT)
+RETURNS TEXT AS $$
+DECLARE
+    v_loan_details_record RECORD;
+    v_formatted_string TEXT;
+    v_customer_name TEXT;
+    v_rate_display NUMERIC;
+BEGIN
+    SELECT
+        l.id AS loan_id,
+        l.amount AS loan_amount,
+        l.interest_rate,
+        l.term_months,
+        l.status AS loan_status,
+        l.created_at AS start_date,
+        c.first_name,
+        c.last_name
+    INTO v_loan_details_record
+    FROM loans l
+    JOIN customers c ON l.customer_id = c.id
+    WHERE l.id = p_loan_id;
+
+    IF NOT FOUND THEN
+        RETURN 'Loan not found.';
+    END IF;
+
+    v_customer_name := trim(COALESCE(v_loan_details_record.first_name, '') || ' ' || COALESCE(v_loan_details_record.last_name, ''));
+    IF v_customer_name = '' THEN
+        v_customer_name := 'N/A';
+    END IF;
+
+    IF v_loan_details_record.interest_rate IS NOT NULL THEN
+        v_rate_display := v_loan_details_record.interest_rate;
+    ELSE
+        v_rate_display := 0;
+    END IF;
+
+    v_formatted_string := format(
+        'Loan ID: %s for Customer: %s - Amount: $%s at %s%% for %s months. Status: %s. Started: %s.',
+        COALESCE(v_loan_details_record.loan_id::TEXT, 'N/A'),
+        v_customer_name,
+        COALESCE(v_loan_details_record.loan_amount::TEXT, 'N/A'),
+        COALESCE(v_rate_display::TEXT, 'N/A'),
+        COALESCE(v_loan_details_record.term_months::TEXT, 'N/A'),
+        COALESCE(v_loan_details_record.loan_status, 'N/A'),
+        COALESCE(to_char(v_loan_details_record.start_date, 'YYYY-MM-DD'), 'N/A')
+    );
+
+    RETURN v_formatted_string;
+END;
+$$ LANGUAGE plpgsql;

@@ -26,3 +26,25 @@
 -- ====================================================================================================================
 
 -- TODO: Implement the complete function definition for 'get_customer_account_numbers_array' below.
+
+CREATE OR REPLACE FUNCTION get_customer_account_numbers_array(p_customer_id INT)
+RETURNS TEXT[] AS $$
+DECLARE
+    v_customer_exists BOOLEAN;
+    v_account_ids_as_text TEXT[];
+BEGIN
+    SELECT EXISTS (SELECT 1 FROM customers WHERE id = p_customer_id)
+    INTO v_customer_exists;
+
+    IF NOT v_customer_exists THEN
+        RETURN '{}'::TEXT[];
+    END IF;
+
+    SELECT COALESCE(array_agg(a.id::TEXT ORDER BY a.id), '{}'::TEXT[])
+    INTO v_account_ids_as_text
+    FROM accounts a
+    WHERE a.customer_id = p_customer_id;
+
+    RETURN v_account_ids_as_text;
+END;
+$$ LANGUAGE plpgsql;

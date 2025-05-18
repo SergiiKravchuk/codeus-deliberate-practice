@@ -40,3 +40,34 @@
 -- ====================================================================================================================
 
 -- TODO: Implement the complete function definition for 'get_column_value_from_table_dynamic' below.
+
+CREATE OR REPLACE FUNCTION get_column_value_from_table_dynamic(
+    p_table_name TEXT,
+    p_column_name TEXT,
+    p_id_column_name TEXT,
+    p_id_value INT
+)
+RETURNS TEXT AS $$
+DECLARE
+    v_query_string TEXT;
+    v_result_value TEXT;
+BEGIN
+    v_query_string := format(
+        'SELECT %I::TEXT FROM %I WHERE %I = %L LIMIT 1',
+        p_column_name,
+        p_table_name,
+        p_id_column_name,
+        p_id_value
+    );
+
+    BEGIN
+        EXECUTE v_query_string INTO v_result_value;
+    EXCEPTION
+        WHEN OTHERS THEN
+            RAISE NOTICE 'Dynamic SQL execution error or no data found for query [%]: %', v_query_string, SQLERRM;
+            v_result_value := NULL;
+    END;
+
+    RETURN v_result_value;
+END;
+$$ LANGUAGE plpgsql;

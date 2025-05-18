@@ -26,3 +26,20 @@
 -- TODO: Implement the complete function definition for 'get_customer_email' below.
 -- This includes the CREATE OR REPLACE FUNCTION statement, parameter definitions,
 -- RETURNS clause, AS $$ DECLARE ... BEGIN ... END; $$ LANGUAGE plpgsql; structure.
+
+CREATE OR REPLACE FUNCTION get_customer_email(p_customer_id INT)
+RETURNS TEXT AS $$
+DECLARE
+    v_email TEXT;
+BEGIN
+    SELECT email INTO v_email
+    FROM customers
+    WHERE id = p_customer_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Customer not found: %', p_customer_id;
+    END IF;
+
+    RETURN v_email;
+END;
+$$ LANGUAGE plpgsql;

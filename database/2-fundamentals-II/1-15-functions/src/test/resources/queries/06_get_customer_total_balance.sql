@@ -24,3 +24,25 @@
 -- ====================================================================================================================
 
 -- TODO: Implement the complete function definition for 'get_customer_total_balance' below.
+
+CREATE OR REPLACE FUNCTION get_customer_total_balance(p_customer_id INT)
+RETURNS NUMERIC AS $$
+DECLARE
+    v_customer_exists BOOLEAN;
+    v_total_balance NUMERIC;
+BEGIN
+    SELECT EXISTS (SELECT 1 FROM customers WHERE id = p_customer_id)
+    INTO v_customer_exists;
+
+    IF NOT v_customer_exists THEN
+        RAISE EXCEPTION 'Customer not found: %', p_customer_id;
+    END IF;
+
+    SELECT COALESCE(SUM(balance), 0.00)
+    INTO v_total_balance
+    FROM accounts
+    WHERE customer_id = p_customer_id;
+
+    RETURN v_total_balance;
+END;
+$$ LANGUAGE plpgsql;

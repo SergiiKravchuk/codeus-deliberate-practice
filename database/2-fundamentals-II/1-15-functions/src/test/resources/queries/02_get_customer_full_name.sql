@@ -26,3 +26,30 @@
 -- ====================================================================================================================
 
 -- TODO: Implement the complete function definition for 'get_customer_full_name' below.
+
+CREATE OR REPLACE FUNCTION get_customer_full_name(p_customer_id INT)
+RETURNS TEXT AS $$
+DECLARE
+    v_first_name TEXT;
+    v_last_name TEXT;
+    v_full_name TEXT;
+BEGIN
+
+    SELECT first_name, last_name
+    INTO v_first_name, v_last_name
+    FROM customers
+    WHERE id = p_customer_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Customer not found: %', p_customer_id;
+    END IF;
+
+    v_full_name := trim(COALESCE(v_first_name, '') || ' ' || COALESCE(v_last_name, ''));
+
+    IF v_full_name = '' THEN
+        RETURN NULL;
+    ELSE
+        RETURN v_full_name;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;

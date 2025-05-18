@@ -20,3 +20,21 @@
 -- ====================================================================================================================
 
 -- TODO: Implement the complete function definition for 'check_if_balance_exceeds_threshold' below.
+
+CREATE OR REPLACE FUNCTION check_if_balance_exceeds_threshold(p_account_id INT, p_threshold NUMERIC)
+RETURNS BOOLEAN AS $$
+DECLARE
+    v_balance NUMERIC;
+BEGIN
+    SELECT balance
+    INTO v_balance
+    FROM accounts
+    WHERE id = p_account_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Account not found: %', p_account_id;
+    END IF;
+
+    RETURN v_balance > p_threshold;
+END;
+$$ LANGUAGE plpgsql;

@@ -35,3 +35,46 @@
 -- ====================================================================================================================
 
 -- TODO: Implement the complete function definition for 'get_account_activity_summary' below.
+
+CREATE OR REPLACE FUNCTION get_account_activity_summary(p_account_id INT, p_transaction_limit INT)
+RETURNS TEXT AS $$
+DECLARE
+    v_account_exists BOOLEAN;
+    v_summary TEXT := '';
+    v_transaction_row RECORD;
+    v_tx_count INT := 0;
+BEGIN
+    SELECT EXISTS (SELECT 1 FROM accounts WHERE id = p_account_id)
+    INTO v_account_exists;
+
+    IF NOT v_account_exists THEN
+        RETURN 'Account not found.';
+    END IF;
+
+    FOR v_transaction_row IN
+        SELECT
+            t.id AS transaction_id,
+            t.transaction_type,
+            t.amount,
+            t.transaction_date
+        FROM transactions t
+        WHERE t.account_id = p_account_id
+        ORDER BY t.transaction_date DESC
+        LIMIT p_transaction_limit
+    LOOP
+        v_summary := v_summary ||
+                     'TxID: ' || COALESCE(v_transaction_row.transaction_id::TEXT, 'N/A') ||
+                     ', Type: ' || COALESCE(v_transaction_row.transaction_type, 'N/A') ||
+                     ', Amount: ' || COALESCE(v_transaction_row.amount::TEXT, 'N/A') ||
+                     ', Date: ' || COALESCE(to_char(v_transaction_row.transaction_date, 'YYYY-MM-DD HH24:MI'), 'N/A') ||
+                     '; ';
+        v_tx_count := v_tx_count + 1;
+    END LOOP;
+
+    IF v_tx_count = 0 THEN
+        v_summary := 'No transactions found for this account.';
+    END IF;
+
+    RETURN v_summary;
+END;
+$$ LANGUAGE plpgsql;

@@ -28,3 +28,32 @@
 -- ====================================================================================================================
 
 -- TODO: Implement the complete function definition for 'determine_account_status_detailed' below.
+
+CREATE OR REPLACE FUNCTION determine_account_status_detailed(p_account_id INT)
+RETURNS TEXT AS $$
+DECLARE
+    v_balance NUMERIC;
+    v_detailed_status TEXT;
+BEGIN
+    SELECT balance
+    INTO v_balance
+    FROM accounts
+    WHERE id = p_account_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Account not found: %', p_account_id;
+    END IF;
+
+    IF v_balance IS NULL THEN
+         v_detailed_status := 'Status Unknown (Balance is NULL)';
+    ELSIF v_balance < 0.00 THEN
+        v_detailed_status := 'Overdrawn';
+    ELSIF v_balance = 0.00 THEN
+        v_detailed_status := 'Empty';
+    ELSE
+        v_detailed_status := 'Active with Positive Balance';
+    END IF;
+
+    RETURN v_detailed_status;
+END;
+$$ LANGUAGE plpgsql;

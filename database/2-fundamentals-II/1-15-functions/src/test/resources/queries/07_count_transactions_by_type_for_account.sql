@@ -23,3 +23,26 @@
 -- ====================================================================================================================
 
 -- TODO: Implement the complete function definition for 'count_transactions_by_type_for_account' below.
+
+CREATE OR REPLACE FUNCTION count_transactions_by_type_for_account(p_account_id INT, p_transaction_type TEXT)
+RETURNS INT AS $$
+DECLARE
+    v_transaction_count INT;
+    v_account_exists BOOLEAN;
+BEGIN
+    SELECT EXISTS (SELECT 1 FROM accounts WHERE id = p_account_id)
+    INTO v_account_exists;
+
+    IF NOT v_account_exists THEN
+        RETURN 0;
+    END IF;
+
+    SELECT COUNT(*)
+    INTO v_transaction_count
+    FROM transactions
+    WHERE account_id = p_account_id
+      AND transaction_type = p_transaction_type;
+
+    RETURN v_transaction_count;
+END;
+$$ LANGUAGE plpgsql;

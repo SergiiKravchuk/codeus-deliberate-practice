@@ -36,3 +36,34 @@
 -- This includes the CREATE OR REPLACE FUNCTION statement, IN and OUT parameter definitions,
 -- AS $$ DECLARE ... BEGIN ... END; $$ LANGUAGE plpgsql; structure.
 -- No explicit RETURN statement is needed when using OUT parameters this way.
+
+CREATE OR REPLACE FUNCTION get_account_details_with_out_params(
+    p_account_id INT,
+    OUT o_account_number TEXT,
+    OUT o_account_type TEXT,
+    OUT o_balance NUMERIC,
+    OUT o_is_active BOOLEAN
+)
+AS $$
+DECLARE
+    v_account_record RECORD;
+BEGIN
+    SELECT
+        a.id,
+        a.account_type,
+        a.balance
+    INTO v_account_record
+    FROM accounts a
+    WHERE a.id = p_account_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Account not found: %', p_account_id;
+    END IF;
+
+    o_account_number := v_account_record.id::TEXT;
+    o_account_type := v_account_record.account_type;
+    o_balance := v_account_record.balance;
+    o_is_active := TRUE;
+
+END;
+$$ LANGUAGE plpgsql;
