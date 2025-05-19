@@ -215,7 +215,7 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
             assertIndexExists(createdTransactionsIndex, expectedTransactionsIndexName);
             assertIndexDefinition(createdTransactionsIndex, expectedTransactionsIndexDefinition);
         }
-
+        
         @Test
         @Order(30)
         void O12_testIndexNotUsed() throws IOException, SQLException {

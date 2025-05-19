@@ -31,15 +31,15 @@ VALUES (1, 'checking', 1500.00),
 ------------------------------------------------------------------------
 -- Populate Transactions table
 ------------------------------------------------------------------------
-INSERT INTO transactions (account_id, transaction_type, amount, target_account_id)
-VALUES (1, 'deposit', 500.00, NULL),
-       (2, 'withdrawal', 200.00, NULL),
-       (3, 'transfer', 300.00, 4),
-       (5, 'deposit', 1000.00, NULL),
-       (6, 'withdrawal', 500.00, NULL),
-       (7, 'transfer', 200.00, 8),
-       (9, 'deposit', 700.00, NULL),
-       (10, 'withdrawal', 300.00, NULL);
+--INSERT INTO transactions (account_id, transaction_type, amount, target_account_id)
+--VALUES (1, 'deposit', 500.00, NULL),
+--       (2, 'withdrawal', 200.00, NULL),
+--       (3, 'transfer', 300.00, 4),
+--       (5, 'deposit', 1000.00, NULL),
+--       (6, 'withdrawal', 500.00, NULL),
+--       (7, 'transfer', 200.00, 8),
+--       (9, 'deposit', 700.00, NULL),
+--       (10, 'withdrawal', 300.00, NULL);
 
 ------------------------------------------------------------------------
 -- Populate Loans table

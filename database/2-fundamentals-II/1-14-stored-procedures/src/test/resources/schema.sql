@@ -32,25 +32,10 @@ CREATE TABLE transactions
 (
     id                SERIAL PRIMARY KEY,
     account_id        INT                                                                           NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
-    transaction_type  VARCHAR(20) CHECK (transaction_type IN ('deposit', 'withdrawal', 'transfer')) NOT NULL,
+    transaction_type  VARCHAR(20) CHECK (transaction_type IN ('deposit', 'withdrawal', 'transfer', 'reversal')) NOT NULL,
     amount            DECIMAL(15, 2)                                                                NOT NULL,
     transaction_date  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     target_account_id INT                                                                           REFERENCES accounts (id) ON DELETE SET NULL
-);
-
---------------------------------------------------------------------------------
--- Create Loans table
---------------------------------------------------------------------------------
-CREATE TABLE loans
-(
-    id            SERIAL PRIMARY KEY,
-    customer_id   INT                                                             NOT NULL,
-    amount        DECIMAL(15, 2)                                                  NOT NULL,
-    interest_rate DECIMAL(5, 2)                                                   NOT NULL,
-    term_months   INT                                                             NOT NULL,
-    status        VARCHAR(20) CHECK (status IN ('active', 'closed', 'defaulted')) NOT NULL DEFAULT 'active',
-    created_at    TIMESTAMP                                                                DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE CASCADE
 );
 
 --------------------------------------------------------------------------------
@@ -61,7 +46,6 @@ CREATE TABLE branches
     id         SERIAL PRIMARY KEY,
     name       VARCHAR(100) NOT NULL,
     location   TEXT         NOT NULL,
-    phone      VARCHAR(20)  NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -77,6 +61,25 @@ CREATE TABLE employees
     salary     DECIMAL(10, 2) NOT NULL,
     branch_id  INT            REFERENCES branches (id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+--------------------------------------------------------------------------------
+-- Create Loans table
+--------------------------------------------------------------------------------
+CREATE TABLE loans
+(
+    id            SERIAL PRIMARY KEY,
+    customer_id   INT                                                             NOT NULL,
+    amount        DECIMAL(15, 2)                                                  NOT NULL,
+    interest_rate DECIMAL(5, 2)                                                   NOT NULL,
+    term_months   INT                                                             NOT NULL,
+    status        VARCHAR(20) CHECK (status IN ('pending', 'approved', 'active', 'closed', 'defaulted'))
+                                                                                 NOT NULL DEFAULT 'pending',
+    branch_id     INT REFERENCES branches(id) ON DELETE SET NULL,
+    approved_by   INT REFERENCES employees(id) ON DELETE SET NULL,
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
 );
 
 --------------------------------------------------------------------------------
