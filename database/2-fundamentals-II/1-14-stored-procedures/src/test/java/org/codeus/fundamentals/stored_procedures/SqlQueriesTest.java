@@ -27,6 +27,7 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
 
     @Nested
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    @Order(1)
     class TransferFundsTest {
         private static final String TASK_1_SQL_PATH = TASK_DIR + "01_transfer-funds-between-accounts.sql";
 
@@ -104,6 +105,7 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
 
     @Nested
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    @Order(3)
     class ReverseTransactionTest {
         private static final String TASK_2_SQL_PATH = TASK_DIR + "02_reverse-transaction.sql";
 
@@ -186,6 +188,7 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
 
     @Nested
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    @Order(5)
     class LogLargeDepositsTest {
         private static final String TASK_3_SQL_PATH = TASK_DIR + "03_log-large-deposits.sql";
 
@@ -270,6 +273,7 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
 
     @Nested
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    @Order(7)
     class ResetBalancesTest {
         private static final String TASK_4_SQL_PATH = TASK_DIR + "04_reset-all-balances.sql";
 
@@ -327,6 +331,7 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
 
     @Nested
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    @Order(10)
     class AssignBranchManagerTest {
         private static final String TASK_5_SQL_PATH = TASK_DIR + "05_assign-branch-manager.sql";
 
@@ -441,6 +446,7 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
 
     @Nested
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    @Order(12)
     class ApproveLoanApplicationTest {
         private static final String TASK_6_SQL_PATH = TASK_DIR + "06_approve-loan-application.sql";
 
