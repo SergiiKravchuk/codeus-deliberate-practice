@@ -30,8 +30,8 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
     class TransferFundsTest {
         private static final String TASK_1_SQL_PATH = TASK_DIR + "01_transfer-funds-between-accounts.sql";
 
-        @AfterAll
-        public static void rollbackBlockChanges() throws SQLException {
+        @AfterEach
+        public void rollbackBlockChanges() throws SQLException {
             connection.rollback();
         }
 
@@ -40,8 +40,9 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
         void O1_testSuccessfulTransferFunds() throws SQLException, IOException {
             executeQueryWithoutResultFromFile(TASK_1_SQL_PATH);
 
-            int senderId = createSavingAccount(new BigDecimal("200.00"));
-            int receiverId = createSavingAccount(new BigDecimal("50.00"));
+            int customerId = createCustomer("Will", "Smith", "will@example.com", "1234567890", "LA");
+            int senderId = createSavingAccount(new BigDecimal("200.00"), customerId);
+            int receiverId = createSavingAccount(new BigDecimal("50.00"), customerId);
 
             CallableStatement stmt = connection.prepareCall("CALL transfer_funds(?, ?, ?)");
             stmt.setInt(1, senderId);
@@ -70,7 +71,8 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
         void O1_testSenderDoesNotExist() throws SQLException, IOException {
             executeQueryWithoutResultFromFile(TASK_1_SQL_PATH);
 
-            int receiverId = createSavingAccount(new BigDecimal("100.00"));
+            int customerId = createCustomer("Will", "Smith", "will@example.com", "1234567890", "LA");
+            int receiverId = createSavingAccount(new BigDecimal("100.00"), customerId);
 
             SQLException ex = assertThrows(SQLException.class, () -> {
                 CallableStatement stmt = connection.prepareCall("CALL transfer_funds(?, ?, ?)");
@@ -88,7 +90,8 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
         void O1_testReceiverDoesNotExist() throws SQLException, IOException {
             executeQueryWithoutResultFromFile(TASK_1_SQL_PATH);
 
-            int senderId = createSavingAccount(new BigDecimal("100.00"));
+            int customerId = createCustomer("Will", "Smith", "will@example.com", "1234567890", "LA");
+            int senderId = createSavingAccount(new BigDecimal("100.00"), customerId);
 
             SQLException ex = assertThrows(SQLException.class, () -> {
                 CallableStatement stmt = connection.prepareCall("CALL transfer_funds(?, ?, ?)");
@@ -107,8 +110,8 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
     class ReverseTransactionTest {
         private static final String TASK_2_SQL_PATH = TASK_DIR + "02_reverse-transaction.sql";
 
-        @AfterAll
-        public static void rollbackBlockChanges() throws SQLException {
+        @AfterEach
+        public void rollbackBlockChanges() throws SQLException {
             connection.rollback();
         }
 
@@ -117,7 +120,8 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
         void O1_testSuccessfulReverseTransaction() throws SQLException, IOException {
             executeQueryWithoutResultFromFile(TASK_2_SQL_PATH);
 
-            int accountId = createSavingAccount(new BigDecimal("200.00"));
+            int customerId = createCustomer("Will", "Smith", "will@example.com", "1234567890", "LA");
+            int accountId = createSavingAccount(new BigDecimal("200.00"), customerId);
 
             // Insert initial transaction (simulate deposit)
             PreparedStatement ps = connection.prepareStatement(
@@ -162,8 +166,8 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
         @Order(15)
         void O3_testAlreadyReversedTransaction() throws SQLException, IOException {
             executeQueryWithoutResultFromFile(TASK_2_SQL_PATH);
-
-            int accountId = createSavingAccount(new BigDecimal("200.00"));
+            int customerId = createCustomer("Will", "Smith", "will@example.com", "1234567890", "LA");
+            int accountId = createSavingAccount(new BigDecimal("200.00"), customerId);
 
             // Insert reversal transaction to simulate already reversed transaction
             PreparedStatement ps = connection.prepareStatement(
@@ -200,7 +204,8 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
             executeQueryWithoutResultFromFile(TASK_3_SQL_PATH);
             connection.setAutoCommit(false);
 
-            int accountId = createSavingAccount(new BigDecimal("500.00"));
+            int customerId = createCustomer("Will", "Smith", "will@example.com", "1234567890", "LA");
+            int accountId = createSavingAccount(new BigDecimal("500.00"), customerId);
 
             // Insert some deposits
             insertTransaction(accountId, new BigDecimal("300.00"), "deposit");
@@ -226,7 +231,8 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
             executeQueryWithoutResultFromFile(TASK_3_SQL_PATH);
             connection.setAutoCommit(false);
 
-            int accountId = createSavingAccount(new BigDecimal("600.00"));
+            int customerId = createCustomer("Will", "Smith", "will@example.com", "1234567890", "LA");
+            int accountId = createSavingAccount(new BigDecimal("600.00"), customerId);
             int txId = insertTransaction(accountId, new BigDecimal("350.00"), "deposit");
 
             // First call
@@ -252,7 +258,8 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
         void O3_testNoDepositsAboveThreshold() throws SQLException, IOException {
             executeQueryWithoutResultFromFile(TASK_3_SQL_PATH);
 
-            int accountId = createSavingAccount(new BigDecimal("200.00"));
+            int customerId = createCustomer("Will", "Smith", "will@example.com", "1234567890", "LA");
+            int accountId = createSavingAccount(new BigDecimal("200.00"), customerId);
 
             insertTransaction(accountId, new BigDecimal("50.00"), "deposit");
             insertTransaction(accountId, new BigDecimal("80.00"), "deposit");
@@ -283,9 +290,10 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
         void O1_testResetAllBalancesSuccessfully() throws SQLException, IOException {
             executeQueryWithoutResultFromFile(TASK_4_SQL_PATH);
 
-            int acc1 = createSavingAccount(new BigDecimal("100.00"));
-            int acc2 = createSavingAccount(new BigDecimal("300.00"));
-            int acc3 = createSavingAccount(new BigDecimal("50.00"));
+            int customerId = createCustomer("Will", "Smith", "will@example.com", "1234567890", "LA");
+            int acc1 = createSavingAccount(new BigDecimal("100.00"), customerId);
+            int acc2 = createSavingAccount(new BigDecimal("300.00"), customerId);
+            int acc3 = createSavingAccount(new BigDecimal("50.00"), customerId);
 
             CallableStatement stmt = connection.prepareCall("CALL reset_balances(?)");
             stmt.setBigDecimal(1, new BigDecimal("200.00"));
@@ -301,7 +309,9 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
         void O2_testResetToZeroBalance() throws SQLException, IOException {
             executeQueryWithoutResultFromFile(TASK_4_SQL_PATH);
 
-            int acc = createSavingAccount(new BigDecimal("999.99"));
+            int customerId = createCustomer("Will", "Smith", "will@example.com", "1234567890", "LA");
+
+            int acc = createSavingAccount(new BigDecimal("999.99"),customerId);
 
             CallableStatement stmt = connection.prepareCall("CALL reset_balances(?)");
             stmt.setBigDecimal(1, new BigDecimal("0.00"));
@@ -613,8 +623,8 @@ public class SqlQueriesTest extends EmbeddedPostgreSqlSetup {
         return rs.getInt("id");
     }
 
-    private int createSavingAccount(BigDecimal balance) {
-        return createAccount(1, "savings", balance);
+    private int createSavingAccount(BigDecimal balance, int customerId) {
+        return createAccount(customerId, "savings", balance);
     }
 
     private int createAccount(int customerId, String accountType, BigDecimal balance) {
