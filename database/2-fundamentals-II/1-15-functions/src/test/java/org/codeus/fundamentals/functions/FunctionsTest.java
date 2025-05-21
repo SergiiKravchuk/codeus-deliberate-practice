@@ -84,6 +84,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         Assertions.assertFalse(result.isEmpty(), "Result set should not be empty when querying for an existing customer's email.");
         Assertions.assertEquals("john.doe@example.com", result.get(0).get("email"), "Email for customer ID 1 should match the test data.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testGetExistingCustomerEmail for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testGetExistingCustomerEmail for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -101,6 +103,9 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
                 () -> executeQuery(sql),
                 "Executing get_customer_email with a non-existent customer ID (999) should throw an SQLException."
         );
+        System.err.println("Caught expected SQLException in testGetNonExistentCustomerEmail: " + exception.getMessage());
+        // exception.printStackTrace(); // Uncomment if a full stack trace is needed
+
         Assertions.assertTrue(exception.getMessage().contains("Customer not found: 999"),
                 "The SQL exception message should indicate that customer ID 999 was not found.");
       } finally {
@@ -131,6 +136,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         Assertions.assertFalse(result.isEmpty(), "Result set should not be empty when querying for an existing customer's full name.");
         Assertions.assertEquals("John Doe", result.get(0).get("full_name"), "Full name for customer ID 1 should be 'John Doe'.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testGetExistingCustomerFullName for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testGetExistingCustomerFullName for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -148,6 +155,7 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
                 () -> executeQuery(sql),
                 "Executing get_customer_full_name with a non-existent customer ID (999) should throw an SQLException."
         );
+        System.err.println("Caught expected SQLException in testGetNonExistentCustomerFullName: " + exception.getMessage());
         Assertions.assertTrue(exception.getMessage().contains("Customer not found: 999"),
                 "The SQL exception message should indicate that customer ID 999 was not found.");
       } finally {
@@ -178,6 +186,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         Assertions.assertFalse(result.isEmpty(), "Result set should not be empty for threshold check.");
         Assertions.assertTrue((Boolean) result.get(0).get("result_val"), "Account ID 1 balance (1500.00) should be considered above the threshold (500.00).");
       } catch (SQLException e) {
+        System.err.println("SQLException during testBalanceAboveThreshold for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testBalanceAboveThreshold for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -196,6 +206,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         Assertions.assertFalse(result.isEmpty(), "Result set should not be empty for threshold check.");
         Assertions.assertFalse((Boolean) result.get(0).get("result_val"), "Account ID 1 balance (1500.00) should NOT be considered above an equal threshold (1500.00).");
       } catch (SQLException e) {
+        System.err.println("SQLException during testBalanceNotAboveThresholdEqualTo for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testBalanceNotAboveThresholdEqualTo for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -214,6 +226,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         Assertions.assertFalse(result.isEmpty(), "Result set should not be empty for threshold check.");
         Assertions.assertFalse((Boolean) result.get(0).get("result_val"), "Account ID 1 balance (1500.00) should NOT be considered above a higher threshold (2000.00).");
       } catch (SQLException e) {
+        System.err.println("SQLException during testBalanceBelowThreshold for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testBalanceBelowThreshold for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -231,6 +245,7 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
                 () -> executeQuery(sql),
                 "Executing check_if_balance_exceeds_threshold with a non-existent account ID (999) should throw an SQLException."
         );
+        System.err.println("Caught expected SQLException in testThresholdCheckNonExistentAccount: " + exception.getMessage());
         Assertions.assertTrue(exception.getMessage().contains("Account not found: 999"), "The SQL exception message should indicate that account ID 999 was not found.");
       } finally {
         rollbackConnection();
@@ -261,6 +276,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         BigDecimal actualBalance = (BigDecimal)result.get(0).get("balance");
         Assertions.assertEquals(0, new BigDecimal("1500.00").compareTo(actualBalance), "Balance for account ID 1 should be 1500.00 as per test data.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testGetExistingAccountBalance for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testGetExistingAccountBalance for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -278,6 +295,7 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
                 () -> executeQuery(sql),
                 "Executing get_account_balance with a non-existent account ID (999) should throw an SQLException."
         );
+        System.err.println("Caught expected SQLException in testGetNonExistentAccountBalance: " + exception.getMessage());
         Assertions.assertTrue(exception.getMessage().contains("Account not found: 999"), "The SQL exception message should indicate that account ID 999 was not found.");
       } finally {
         rollbackConnection();
@@ -298,13 +316,20 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
     private void assertInterestCalculation(String balanceInput, String expectedInterestStr, String tierDescription) throws SQLException {
       String sql = "SELECT calculate_interest_for_balance(" + balanceInput + ") AS interest;";
       System.out.println("\nExecuting Query for Task 5 (assertInterestCalculation - " + tierDescription + "):\n" + sql);
-      List<Map<String, Object>> result = executeQuery(sql);
-      printQueryResults(result);
-      Assertions.assertFalse(result.isEmpty(), "Result set should not be empty for interest calculation of balance: " + balanceInput);
-      BigDecimal actualInterest = (BigDecimal) result.get(0).get("interest");
-      BigDecimal expectedInterest = new BigDecimal(expectedInterestStr);
-      Assertions.assertEquals(0, expectedInterest.compareTo(actualInterest.setScale(2, RoundingMode.HALF_UP)),
-              "Interest calculation for " + tierDescription + " (balance " + balanceInput + ") should be " + expectedInterestStr + ".");
+      List<Map<String, Object>> result = null;
+      try {
+        result = executeQuery(sql);
+        printQueryResults(result);
+        Assertions.assertFalse(result.isEmpty(), "Result set should not be empty for interest calculation of balance: " + balanceInput);
+        BigDecimal actualInterest = (BigDecimal) result.get(0).get("interest");
+        BigDecimal expectedInterest = new BigDecimal(expectedInterestStr);
+        Assertions.assertEquals(0, expectedInterest.compareTo(actualInterest.setScale(2, RoundingMode.HALF_UP)),
+                "Interest calculation for " + tierDescription + " (balance " + balanceInput + ") should be " + expectedInterestStr + ".");
+      } catch (SQLException e) {
+        System.err.println("SQLException during assertInterestCalculation for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
+        Assertions.fail("SQLException during assertInterestCalculation for " + tierDescription + " with balance " + balanceInput + ": " + e.getMessage());
+      }
     }
 
     @Test @Order(1) @DisplayName("Tier 1 (< 1000.00): Balance 500.00 should yield 2.50 interest (0.5%)")
@@ -312,6 +337,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
       try {
         assertInterestCalculation("500.00", "2.50", "Tier 1");
       } catch (SQLException e) {
+        System.err.println("SQLException in testTier1: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testTier1: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -322,6 +349,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
       try {
         assertInterestCalculation("1000.00", "10.00", "Tier 2 Lower Bound");
       } catch (SQLException e) {
+        System.err.println("SQLException in testTier2Lower: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testTier2Lower: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -332,6 +361,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
       try {
         assertInterestCalculation("2500.00", "25.00", "Tier 2 Mid Value");
       } catch (SQLException e) {
+        System.err.println("SQLException in testTier2Mid: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testTier2Mid: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -342,6 +373,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
       try {
         assertInterestCalculation("5000.00", "75.00", "Tier 3 Lower Bound");
       } catch (SQLException e) {
+        System.err.println("SQLException in testTier3Lower: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testTier3Lower: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -352,6 +385,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
       try {
         assertInterestCalculation("15000.00", "225.00", "Tier 3 Mid Value");
       } catch (SQLException e) {
+        System.err.println("SQLException in testTier3Mid: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testTier3Mid: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -362,6 +397,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
       try {
         assertInterestCalculation("20000.00", "400.00", "Tier 4 Lower Bound");
       } catch (SQLException e) {
+        System.err.println("SQLException in testTier4Lower: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testTier4Lower: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -372,6 +409,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
       try {
         assertInterestCalculation("50000.00", "1000.00", "Tier 4 High Value");
       } catch (SQLException e) {
+        System.err.println("SQLException in testTier4High: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testTier4High: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -382,6 +421,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
       try {
         assertInterestCalculation("NULL", "0.00", "NULL input");
       } catch (SQLException e) {
+        System.err.println("SQLException in testNullInput: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testNullInput: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -392,6 +433,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
       try {
         assertInterestCalculation("-100.00", "0.00", "Negative input");
       } catch (SQLException e) {
+        System.err.println("SQLException in testNegativeInput: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testNegativeInput: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -402,6 +445,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
       try {
         assertInterestCalculation("0.00", "0.00", "Zero input");
       } catch (SQLException e) {
+        System.err.println("SQLException in testZeroInput: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testZeroInput: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -429,6 +474,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         BigDecimal actualTotalBalance = (BigDecimal)result.get(0).get("total_balance");
         Assertions.assertEquals(0, new BigDecimal("11500.00").compareTo(actualTotalBalance), "Total balance for customer ID 1 (with multiple accounts) is incorrect.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testMultipleAccounts for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testMultipleAccounts for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -444,6 +491,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         BigDecimal actualTotalBalance = (BigDecimal)result.get(0).get("total_balance");
         Assertions.assertEquals(0, new BigDecimal("1200.00").compareTo(actualTotalBalance), "Total balance for customer ID 2 (with a single account) is incorrect.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testSingleAccount for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testSingleAccount for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -459,6 +508,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         BigDecimal actualTotalBalance = (BigDecimal)result.get(0).get("total_balance");
         Assertions.assertEquals(0, new BigDecimal("0.00").compareTo(actualTotalBalance), "Total balance for customer ID 10 (with no accounts) should be 0.00.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testNoAccounts for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testNoAccounts for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -473,6 +524,7 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
                 () -> executeQuery(sql),
                 "Executing get_customer_total_balance with a non-existent customer ID (999) should throw an SQLException."
         );
+        System.err.println("Caught expected SQLException in testNonExistentCustomer: " + exception.getMessage());
         Assertions.assertTrue(exception.getMessage().contains("Customer not found: 999"), "The SQL exception message should indicate that customer ID 999 was not found.");
       } finally {
         rollbackConnection();
@@ -499,6 +551,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(result);
         Assertions.assertEquals(1, ((Number)result.get(0).get("tx_count")).intValue(), "Count of 'deposit' transactions for account ID 1 is incorrect.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testExistingType for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testExistingType for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -513,6 +567,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(result);
         Assertions.assertEquals(0, ((Number)result.get(0).get("tx_count")).intValue(), "Count of 'Fee' transactions for account ID 1 should be 0.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testNonExistingType for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testNonExistingType for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -527,6 +583,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(result);
         Assertions.assertEquals(0, ((Number)result.get(0).get("tx_count")).intValue(), "Count of 'deposit' transactions for account ID 4 (which has no transactions) should be 0.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testAccountWithNoTransactions for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testAccountWithNoTransactions for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -541,6 +599,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(result);
         Assertions.assertEquals(0, ((Number)result.get(0).get("tx_count")).intValue(), "Transaction count for a non-existent account ID (999) should be 0 as per function logic.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testNonExistentAccount for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testNonExistentAccount for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -571,6 +631,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         Assertions.assertEquals("deposit", tx1.get("transaction_type"), "Transaction type for the retrieved transaction is incorrect.");
         Assertions.assertEquals(0, new BigDecimal("500.00").compareTo((BigDecimal)tx1.get("amount")), "Transaction amount for the retrieved transaction is incorrect.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testAccountWithTransactions for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testAccountWithTransactions for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -585,6 +647,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(results);
         Assertions.assertTrue(results.isEmpty(), "Should return an empty set of transactions for account ID 4, which has no transactions.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testAccountWithNoTransactionsSrf for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testAccountWithNoTransactionsSrf for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -599,6 +663,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(results);
         Assertions.assertTrue(results.isEmpty(), "Should return an empty set of transactions for a non-existent account ID (999).");
       } catch (SQLException e) {
+        System.err.println("SQLException during testNonExistentAccountSrf for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testNonExistentAccountSrf for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -629,6 +695,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         Assertions.assertTrue(summary.contains("Amount: 500.00"), "Activity summary for account ID 1 is missing transaction amount for TxID 1.");
         Assertions.assertEquals(1, summary.split(";", -1).length -1, "Activity summary for account ID 1 should contain exactly 1 transaction entry." );
       } catch (SQLException e) {
+        System.err.println("SQLException during testSummaryWithTransactions for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testSummaryWithTransactions for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -643,6 +711,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(result);
         Assertions.assertEquals("No transactions found for this account.", result.get(0).get("summary"), "Activity summary for account ID 4 (no transactions) is incorrect.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testSummaryNoTransactions for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testSummaryNoTransactions for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -657,6 +727,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(result);
         Assertions.assertEquals("Account not found.", result.get(0).get("summary"), "Activity summary for a non-existent account ID (999) is incorrect.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testSummaryNonExistentAccount for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testSummaryNonExistentAccount for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -689,6 +761,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         Arrays.sort(accountIdsAsText);
         Assertions.assertArrayEquals(new String[]{"1", "2"}, accountIdsAsText, "Account IDs (returned as text array) for customer ID 1 are incorrect. Assumes function adapts to missing 'account_number' column by using 'id'.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testCustomerWithAccountsArray for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         if (e.getMessage().contains("column a.account_number does not exist") || e.getMessage().contains("column accounts.account_number does not exist")) {
           Assertions.fail("Task 10 function ('get_customer_account_numbers_array') likely failed due to the 'account_number' column not existing in the 'accounts' table as per the current schema.sql. The function implementation might need to be adapted (e.g., to use 'id::TEXT') or the schema would need the 'account_number' column. Original error: " + e.getMessage());
         } else {
@@ -712,6 +786,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         String[] accountIdsAsText = (String[])pgArray.getArray();
         Assertions.assertEquals(0, accountIdsAsText.length, "Account ID array for customer ID 10 (who has no accounts) should be empty.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testCustomerNoAccountsArray for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         if (e.getMessage().contains("column a.account_number does not exist") || e.getMessage().contains("column accounts.account_number does not exist")) {
           Assertions.fail("Task 10 function ('get_customer_account_numbers_array') likely failed due to missing 'account_number' column. Original error: " + e.getMessage());
         } else {
@@ -734,6 +810,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         Assertions.assertNotNull(pgArray, "Resulting array for non-existent customer should not be null (expected empty or exception).");
         Assertions.assertEquals(0, ((String[])pgArray.getArray()).length, "Account ID array for a non-existent customer ID (999) should be empty if no error is raised first.");
       } catch (SQLException e) {
+        System.err.println("Caught SQLException in testNonExistentCustomerArray: " + e.getMessage());
+        // e.printStackTrace(); // Uncomment if a full stack trace is needed
         if (e.getMessage().contains("Customer not found: 999")) {
           // This is an acceptable outcome if the function raises this before array_agg.
         } else if (e.getMessage().contains("column a.account_number does not exist") || e.getMessage().contains("column accounts.account_number does not exist")) {
@@ -772,6 +850,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         Assertions.assertTrue(details.contains("Amount: $5000.00"), "Formatted loan details string is missing or has incorrect 'Amount: $5000.00'.");
         Assertions.assertTrue(details.contains("at 5.50%"), "Formatted loan details string is missing or has incorrect interest rate format 'at 5.50%'.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testExistingLoanFormat for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testExistingLoanFormat for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -788,6 +868,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(result);
         Assertions.assertEquals("Loan not found.", result.get(0).get("details"), "Response for a non-existent loan ID (999) is incorrect.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testNonExistentLoanFormat for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testNonExistentLoanFormat for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -813,12 +895,15 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(result);
         Assertions.assertEquals(expectedDetailedStatus, result.get(0).get("s"), "Detailed status for account ID " + accountId + " (" + testCaseDescription + ") is incorrect.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testStatus for account ID " + accountId + " (" + testCaseDescription + ") for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         if (e.getMessage().contains("column \"status\" does not exist") || e.getMessage().contains("column v_status does not exist")) {
           Assertions.fail("Task 12 function ('determine_account_status_detailed') failed for account ID " + accountId +
                   " due to the 'status' column not existing in the 'accounts' table as per the current schema.sql. " +
                   "The function implementation might need adaptation or the schema requires the 'status' column. Original error: " + e.getMessage());
         } else if (e.getMessage().contains("Account not found: " + accountId) && expectedDetailedStatus.equals("Account not found.")) {
           // This is an expected outcome for a specific test case (non-existent account)
+          // No Assertions.fail needed here
         }
         else {
           Assertions.fail("Unexpected SQLException for account ID " + accountId + " (" + testCaseDescription + ") for query [" + sql + "]: " + e.getMessage());
@@ -846,6 +931,7 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
                 () -> executeQuery(sql),
                 "Executing determine_account_status_detailed for non-existent account ID 999 should throw SQLException."
         );
+        System.err.println("Caught expected SQLException in testStatusNonExistentAccount: " + exception.getMessage());
         String exceptionMessage = exception.getMessage();
         boolean correctException = exceptionMessage.contains("Account not found: 999") ||
                 exceptionMessage.contains("column \"status\" does not exist") ||
@@ -890,6 +976,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         }
 
       } catch (SQLException e) {
+        System.err.println("SQLException during testExistingAccountOutParams for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         if (e.getMessage().contains("column accounts.account_number does not exist") ||
                 e.getMessage().contains("column accounts.status does not exist")) {
           Assertions.fail("Task 13 function ('get_account_details_with_out_params') likely failed due to missing 'account_number' or 'status' column in the 'accounts' table (as per schema.sql for this module). The function implementation might need adaptation or the schema requires these columns. Original error: " + e.getMessage());
@@ -912,6 +1000,7 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
                 () -> executeQuery(sql),
                 "Executing get_account_details_with_out_params for non-existent account ID 999 should throw SQLException."
         );
+        System.err.println("Caught expected SQLException in testNonExistentAccountOutParams: " + exception.getMessage());
         String exceptionMessage = exception.getMessage();
         boolean correctException = exceptionMessage.contains("Account not found: 999") ||
                 exceptionMessage.contains("column accounts.account_number does not exist") ||
@@ -956,6 +1045,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(results2);
         Assertions.assertTrue(results2.isEmpty(), "Should find 0 transactions for account ID 1 with amount > 600.00.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testFilteredTransactions. Query1: [" + sql + "], Query2: ["+ sql2 + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testFilteredTransactions. Query1: [" + sql + "], Query2: ["+ sql2 + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -974,6 +1065,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(results);
         Assertions.assertTrue(results.isEmpty(), "Should return an empty set for account ID 4 (no transactions), regardless of min_amount.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testNoMatchingTransactions for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testNoMatchingTransactions for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -992,6 +1085,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(results);
         Assertions.assertTrue(results.isEmpty(), "Should return an empty set for a non-existent account ID (999).");
       } catch (SQLException e) {
+        System.err.println("SQLException during testNonExistentAccountForFilteredTransactions for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testNonExistentAccountForFilteredTransactions for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -1020,6 +1115,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(result);
         Assertions.assertEquals("john.doe@example.com", result.get(0).get("val"), "Dynamically retrieved email for customer ID 1 is incorrect.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testGetCustomerEmailDynamic for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testGetCustomerEmailDynamic for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -1037,6 +1134,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(result);
         Assertions.assertEquals("1500.00", result.get(0).get("val"), "Dynamically retrieved balance (as TEXT) for account ID 1 is incorrect.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testGetAccountBalanceDynamic for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testGetAccountBalanceDynamic for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -1054,6 +1153,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(result);
         Assertions.assertNull(result.get(0).get("val"), "Dynamically retrieving a column for a non-existent ID should return NULL.");
       } catch (SQLException e) {
+        System.err.println("SQLException during testNonExistentIdDynamic for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testNonExistentIdDynamic for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -1064,13 +1165,15 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
     @Order(4)
     @DisplayName("Should return NULL for invalid table name dynamically (if function handles error)")
     void testInvalidTableDynamic() {
-      String sql = "SELECT get_column_value_from_table_dynamic('non_existent_table', 'email', 'customer_id', 1) AS val;";
+      String sql = "SELECT get_column_value_from_table_dynamic('non_existent_table', 'email', 'id', 1) AS val;";
       try {
         System.out.println("\nExecuting Query for Task 15 (testInvalidTableDynamic):\n" + sql);
         List<Map<String, Object>> result = executeQuery(sql);
         printQueryResults(result);
         Assertions.assertNull(result.get(0).get("val"), "Dynamically retrieving from a non-existent table should return NULL (assuming function error handling).");
       } catch (SQLException e) {
+        System.err.println("SQLException during testInvalidTableDynamic for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testInvalidTableDynamic for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
@@ -1088,6 +1191,8 @@ public class FunctionsTest extends EmbeddedPostgreSqlSetup {
         printQueryResults(result);
         Assertions.assertNull(result.get(0).get("val"), "Dynamically retrieving a non-existent column should return NULL (assuming function error handling).");
       } catch (SQLException e) {
+        System.err.println("SQLException during testInvalidColumnDynamic for query [" + sql + "]: " + e.getMessage());
+        e.printStackTrace();
         Assertions.fail("SQLException during testInvalidColumnDynamic for query [" + sql + "]: " + e.getMessage());
       } finally {
         rollbackConnection();
