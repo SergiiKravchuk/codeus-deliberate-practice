@@ -1,87 +1,79 @@
 --------------------------------------------------------------------------------
--- Create Customers table
+-- Event Triggers Practice Schema - Final Version
 --------------------------------------------------------------------------------
-CREATE TABLE customers
+
+--------------------------------------------------------------------------------
+-- DDL Audit Logging (Task 1) and Access Control (Task 3)
+--------------------------------------------------------------------------------
+CREATE TABLE ddl_audit_log
 (
-    id         SERIAL PRIMARY KEY,
-    first_name VARCHAR(50)         NOT NULL,
-    last_name  VARCHAR(50)         NOT NULL,
-    email      VARCHAR(100) UNIQUE NOT NULL,
-    phone      VARCHAR(20) UNIQUE  NOT NULL,
-    address    TEXT                NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id          SERIAL PRIMARY KEY,
+    command_tag TEXT NOT NULL,
+    object_type TEXT,
+    object_name TEXT,
+    user_name   TEXT NOT NULL,
+    logged_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 --------------------------------------------------------------------------------
--- Create Accounts table
+-- DDL Operations Statistics (Task 4)
 --------------------------------------------------------------------------------
-CREATE TABLE accounts
+CREATE TABLE ddl_operations_stats
 (
-    id           SERIAL PRIMARY KEY,
-    customer_id  INT                                                         NOT NULL,
-    account_type VARCHAR(20) CHECK (account_type IN ('checking', 'savings')) NOT NULL,
-    balance      DECIMAL(15, 2)                                              NOT NULL DEFAULT 0.00,
-    created_at   TIMESTAMP                                                            DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE CASCADE
+    id              SERIAL PRIMARY KEY,
+    user_name       TEXT    NOT NULL,
+    command_tag     TEXT    NOT NULL,
+    operation_count INTEGER NOT NULL DEFAULT 1,
+    last_executed   TIMESTAMP        DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_name, command_tag)
 );
 
 --------------------------------------------------------------------------------
--- Create Transactions table
+-- Trigger Execution Statistics (Task 5)
 --------------------------------------------------------------------------------
-CREATE TABLE transactions
+CREATE TABLE trigger_execution_stats
 (
-    id                SERIAL PRIMARY KEY,
-    account_id        INT                                                                           NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
-    transaction_type  VARCHAR(20) CHECK (transaction_type IN ('deposit', 'withdrawal', 'transfer')) NOT NULL,
-    amount            DECIMAL(15, 2)                                                                NOT NULL,
-    transaction_date  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    target_account_id INT                                                                           REFERENCES accounts (id) ON DELETE SET NULL
+    id             SERIAL PRIMARY KEY,
+    trigger_name   TEXT NOT NULL,
+    event_type     TEXT NOT NULL,
+    command_tag    TEXT NOT NULL,
+    execution_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_name      TEXT NOT NULL,
+    success        BOOLEAN   DEFAULT TRUE
 );
 
 --------------------------------------------------------------------------------
--- Create Loans table
+-- Sample Application Tables for Testing
 --------------------------------------------------------------------------------
-CREATE TABLE loans
+CREATE TABLE products
 (
-    id            SERIAL PRIMARY KEY,
-    customer_id   INT                                                             NOT NULL,
-    amount        DECIMAL(15, 2)                                                  NOT NULL,
-    interest_rate DECIMAL(5, 2)                                                   NOT NULL,
-    term_months   INT                                                             NOT NULL,
-    status        VARCHAR(20) CHECK (status IN ('active', 'closed', 'defaulted')) NOT NULL DEFAULT 'active',
-    created_at    TIMESTAMP                                                                DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE CASCADE
+    id          SERIAL PRIMARY KEY,
+    name        VARCHAR(100)   NOT NULL,
+    price       DECIMAL(10, 2) NOT NULL,
+    category_id INTEGER,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
---------------------------------------------------------------------------------
--- Step 1: Create Branches table WITHOUT manager_id
---------------------------------------------------------------------------------
-CREATE TABLE branches
+CREATE TABLE categories
 (
-    id         SERIAL PRIMARY KEY,
-    name       VARCHAR(100) NOT NULL,
-    location   TEXT         NOT NULL,
-    phone      VARCHAR(20)  NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id          SERIAL PRIMARY KEY,
+    name        VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
---------------------------------------------------------------------------------
--- Step 2: Create Employees table
---------------------------------------------------------------------------------
-CREATE TABLE employees
-(
-    id         SERIAL PRIMARY KEY,
-    first_name VARCHAR(50)    NOT NULL,
-    last_name  VARCHAR(50)    NOT NULL,
-    position   VARCHAR(50)    NOT NULL,
-    salary     DECIMAL(10, 2) NOT NULL,
-    branch_id  INT            REFERENCES branches (id) ON DELETE SET NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+ALTER TABLE products
+    ADD CONSTRAINT fk_products_category
+        FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL;
 
 --------------------------------------------------------------------------------
--- Step 3: Add manager_id to Branches table AFTER Employees exists
+-- Test View for DDL Operations
 --------------------------------------------------------------------------------
-ALTER TABLE branches
-    ADD COLUMN manager_id INT UNIQUE,
-    ADD CONSTRAINT fk_manager FOREIGN KEY (manager_id) REFERENCES employees (id) ON DELETE SET NULL;
+CREATE VIEW product_summary AS
+SELECT p.id,
+       p.name as product_name,
+       p.price,
+       c.name as category_name,
+       p.created_at
+FROM products p
+         LEFT JOIN categories c ON p.category_id = c.id;
