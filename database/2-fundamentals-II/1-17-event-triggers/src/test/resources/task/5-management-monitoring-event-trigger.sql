@@ -3,22 +3,29 @@
 -- ====================================================================================================================
 -- TODO:
 -- 1. Create a function named `log_trigger_activity` that will:
---    - Simply record that event triggers are being executed
---    - Track basic information about DDL commands
---    - Log to trigger_execution_stats table
+--    - Insert a record into the `trigger_execution_stats` table for each trigger execution
+--    - Log the essential fields:
+--        - `trigger_name` - use hardcoded value 'activity_logger'
+--        - `event_type` - use `tg_event` (the type of event that fired the trigger)
+--        - `command_tag` - use `tg_tag` (the DDL command being executed)
+--        - `user_name` - use `session_user` (current session user name)
 
-
--- 2. Create an event trigger to track activity
-
+-- 2. Create an event trigger named `activity_logger` that will:
+--    - Execute on ddl_command_end events (after DDL execution completes)
+--    - Call the `log_trigger_activity` function
 
 -- 3. Create a function named `disable_event_trigger` that will:
---    - Take a trigger name as parameter
---    - Disable that event trigger
---    - Return success or error message
-
+--    - Accept parameter `trigger_name TEXT` - the name of the trigger to disable
+--    - Use `EXECUTE` with dynamic SQL to run `ALTER EVENT TRIGGER ... DISABLE` command
+--    - Use `quote_ident()` to safely quote the trigger name in the SQL
+--    - Return success message: 'Trigger ' || trigger_name || ' disabled successfully'
+--    - Use EXCEPTION block with `WHEN OTHERS` to catch any errors
+--    - Return error message: 'Error disabling trigger: ' || SQLERRM on failure
 
 -- 4. Create a function named `enable_event_trigger` that will:
---    - Take a trigger name as parameter
---    - Enable that event trigger
---    - Return success or error message
-
+--    - Accept parameter `trigger_name TEXT` - the name of the trigger to enable
+--    - Use `EXECUTE` with dynamic SQL to run `ALTER EVENT TRIGGER ... ENABLE` command
+--    - Use `quote_ident()` to safely quote the trigger name in the SQL
+--    - Return success message: 'Trigger ' || trigger_name || ' enabled successfully'
+--    - Use EXCEPTION block with `WHEN OTHERS` to catch any errors
+--    - Return error message: 'Error enabling trigger: ' || SQLERRM on failure

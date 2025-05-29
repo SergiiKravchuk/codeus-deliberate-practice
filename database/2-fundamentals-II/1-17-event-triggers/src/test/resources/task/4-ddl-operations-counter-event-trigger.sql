@@ -1,18 +1,27 @@
 -- ====================================================================================================================
 -- TASK 4: DDL Operations Counter
 -- ====================================================================================================================
--- This task focuses on counting and tracking DDL operations by users
-
 -- TODO:
 -- 1. Create a function named `count_ddl_operations` that will:
---    - Track how many DDL operations each user performs
---    - Count different types of operations (CREATE TABLE, ALTER INDEX, etc.)
---    - Update counters in the ddl_operations_stats table
---    - Use simple INSERT or UPDATE logic
-
+--    - Declare variables:
+--        - `ddl_object RECORD` - to store information from pg_event_trigger_ddl_commands()
+--        - `current_user_name TEXT` - to store the current session user
+--        - `existing_count INTEGER` - to check if user/command combination already exists
+--    - Get current user using `session_user` and store in `current_user_name`
+--    - Check if `tg_event = 'ddl_command_end'` to ensure we only count completed operations
+--    - Use FOR loop to iterate through all objects returned by `pg_event_trigger_ddl_commands()`. Hint: `FOR ddl_object IN SELECT * FROM pg_event_trigger_ddl_commands()`
+--    - For each DDL object:
+--        - Check if record exists: `SELECT operation_count INTO existing_count FROM ddl_operations_stats WHERE user_name = current_user_name AND command_tag = tg_tag`
+--        - If `existing_count IS NULL` (first time user performs this operation):
+--            - INSERT new record into `ddl_operations_stats` with:
+--                - `user_name` = `current_user_name`
+--                - `command_tag` = `tg_tag`
+--                - `operation_count` = 1
+--                - `last_executed` = `CURRENT_TIMESTAMP`
+--        - ELSE (record exists):
+--            - UPDATE existing record: increment `operation_count` by 1 and set `last_executed` = `CURRENT_TIMESTAMP`
+--            - Use WHERE clause to match `user_name` and `command_tag`
 
 -- 2. Create an event trigger named `ddl_counter_trigger` that will:
 --    - Execute on ddl_command_end events (after successful DDL execution)
 --    - Call the `count_ddl_operations` function
---    - Track statistics for reporting
-

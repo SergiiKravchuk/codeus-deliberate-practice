@@ -3,10 +3,21 @@
 -- ====================================================================================================================
 -- TODO:
 -- 1. Create a function named `control_ddl_access` that will:
---    - Block operations for users with 'guest' in their name
---    - Block operations during working hours (10 AM to 5 PM) for non-admin users
---    - Allow operations for users with 'admin' or 'dba' in their name
---    - Log blocked attempts to ddl_audit_log table
+--    - Declare variables:
+--        - `current_hour INTEGER` - to store the current hour
+--        - `current_user_name TEXT` - to store the current session user
+--        - `is_admin BOOLEAN := FALSE` - to track if user has admin privileges
+--    - Get current user using `session_user` and store in `current_user_name`
+--    - Get current hour using `EXTRACT(hour FROM CURRENT_TIME)` and store in `current_hour`
+--    - Check if user is admin by testing if `current_user_name` contains 'admin' or 'dba' (use `ILIKE '%admin%' OR current_user_name ILIKE '%dba%'`)
+--    - Block guest users completely:
+--        - Check if `current_user_name` contains 'guest' (use `ILIKE '%guest%'`)
+--        - If guest user: insert blocked attempt into `ddl_audit_log` with command_tag as 'BLOCKED - ' || tg_tag, object_name as 'ACCESS_DENIED'
+--        - Raise exception with message about user not allowed to perform DDL operations
+--    - Block non-admin users during working hours (10 AM to 5 PM):
+--        - Check if `current_hour >= 10 AND current_hour < 17 AND NOT is_admin`
+--        - If blocked: insert blocked attempt into `ddl_audit_log` with command_tag as 'BLOCKED - ' || tg_tag, object_name as 'TIME_RESTRICTED'
+--        - Raise exception with message about DDL operations not allowed during working hours, including current time
 
 
 -- 2. Create an event trigger named `ddl_access_control` that will:
