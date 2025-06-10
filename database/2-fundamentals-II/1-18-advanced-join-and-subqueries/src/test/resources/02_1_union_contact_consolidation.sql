@@ -13,17 +13,6 @@
 -- Task 2.1: Create Master Contact List (with duplicate removal)
 -- Combine all email addresses from customers and employees
 -- Remove duplicates for marketing compliance
-SELECT
-    email,
-    'CUSTOMER' AS contact_type,
-    first_name,
-    last_name
-FROM customers
-UNION
-SELECT
-    CONCAT(first_name, '.', last_name, '@bankinternal.com') AS email,
-    'EMPLOYEE' AS contact_type,
-    first_name,
-    last_name
-FROM employees
-ORDER BY email;
+
+-- TODO:
+-- write your code here

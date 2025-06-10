@@ -200,47 +200,6 @@ public class SetOperationsTest extends BaseAdvancedJoinTest {
                 validator.getCustomerCount() + " total customers");
     }
 
-    @Test
-    @Order(11)
-    @DisplayName("Task 7: VIP Analysis - Data Consistency Validation")
-    void test07VipAnalysisDataConsistency() throws SQLException {
-        BusinessDataValidator validator = new BusinessDataValidator(connection);
-
-        // Test data setup validation
-        assertTrue(validator.getCustomerCount() > 0, "Should have customers in test data");
-        assertTrue(validator.getAccountsCount() > 0, "Should have accounts in test data");
-        assertTrue(validator.getActiveLoansCount() > 0, "Should have loans in test data");
-
-        // Log counts for debugging
-        System.out.println("Test data counts:");
-        System.out.println("Total customers: " + validator.getCustomerCount());
-        System.out.println("Total accounts: " + validator.getAccountsCount());
-        System.out.println("Total loans: " + validator.getActiveLoansCount());
-        System.out.println("Active loans: " + validator.getActiveLoansCount());
-
-        // Validate test data has potential VIP customers
-        Set<Integer> highBalanceCustomers = validator.getCustomersWithHighBalance(5000);
-        Set<Integer> highLoanCustomers = validator.getCustomersWithHighValueActiveLoans(10000);
-
-        System.out.println("VIP criteria analysis:");
-        System.out.println("Customers with high balance (>5000): " + highBalanceCustomers.size());
-        System.out.println("Customers with high loans (>10000, active): " + highLoanCustomers.size());
-
-        // Log specific test data for debugging
-        if (!highBalanceCustomers.isEmpty()) {
-            System.out.println("High balance customers: " + highBalanceCustomers);
-        }
-        if (!highLoanCustomers.isEmpty()) {
-            System.out.println("High loan customers: " + highLoanCustomers);
-        }
-
-        Set<Integer> intersection = new HashSet<>(highBalanceCustomers);
-        intersection.retainAll(highLoanCustomers);
-        System.out.println("Expected VIP customers: " + intersection);
-
-        assertTrue(true, "Data consistency check completed - see logs for details");
-    }
-
     /**
      * Checks if the result row contains contact type field.
      */
