@@ -11,7 +11,10 @@ VALUES ('John', 'Doe', 'john.doe@example.com', '1234567890', '123 Main St'),
        ('Liam', 'Anderson', 'liam.anderson@example.com', '7890123456', '404 Walnut St'),
        ('Olivia', 'Martinez', 'olivia.martinez@example.com', '8901234567', '505 Cherry St'),
        ('Mason', 'Clark', 'mason.clark@example.com', '9012345678', '606 Elm St'),
-       ('Sophia', 'Rodriguez', 'sophia.rodriguez@example.com', '0123456789', '707 Ash St');
+       ('Sophia', 'Rodriguez', 'sophia.rodriguez@example.com', '0123456789', '707 Ash St'),
+       ('NoLoan', 'Customer', 'noloan@example.com', '1111111111', 'NoLoan Street'),
+       ('John', 'Doe', 'john.doe@bankinternal.com', '1234567890', '123 Main St'),
+       ('John', 'Doe', 'john.doe@bankinternal.com', '1234567890', '123 Main St');
 
 ------------------------------------------------------------------------
 -- Populate Accounts table
@@ -39,7 +42,12 @@ VALUES (1, 'deposit', 500.00, NULL),
        (6, 'withdrawal', 500.00, NULL),
        (7, 'transfer', 200.00, 8),
        (9, 'deposit', 700.00, NULL),
-       (10, 'withdrawal', 300.00, NULL);
+       (8, 'deposit', 700.00, NULL),
+       (8, 'withdrawal', 250.00, NULL),
+       (9, 'deposit', 700.00, NULL),
+       (10, 'withdrawal', 300.00, NULL),
+       (10, 'deposit', 500.00, NULL),
+       (10, 'deposit', 600.00, NULL);
 
 ------------------------------------------------------------------------
 -- Populate Loans table
@@ -76,7 +84,8 @@ VALUES ('Michael', 'Scott', 'Manager', 60000.00, 1),
        ('Stanley', 'Hudson', 'Loan Officer', 55000.00, 3),
        ('Angela', 'Martin', 'Accountant', 48000.00, 3),
        ('Kevin', 'Malone', 'Cashier', 39000.00, 4),
-       ('Oscar', 'Martinez', 'Auditor', 53000.00, 4);
+       ('Oscar', 'Martinez', 'Auditor', 53000.00, 4),
+       ('John', 'Doe', 'Marketing', 51000, 1);
 
 ------------------------------------------------------------------------
 -- Update Branches table to set manager_id after Employees are inserted
