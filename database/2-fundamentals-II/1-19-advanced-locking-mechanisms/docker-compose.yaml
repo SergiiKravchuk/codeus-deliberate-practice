@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fintech
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: always
+
+  test-runner:
+    build: ./tests
+    container_name: locks-app
+    depends_on:
+      - db
+    environment:
+      PGHOST: db
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: fintech
+      PGPORT: 5432
+      INIT_SQL_PATH: /app/init.sql
+    working_dir: /app
+    volumes:
+      - ./tasks:/tasks
+      - ./init.sql:/app/init.sql

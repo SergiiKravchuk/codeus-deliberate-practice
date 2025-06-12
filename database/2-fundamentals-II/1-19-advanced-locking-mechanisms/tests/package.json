@@ -1,0 +1,12 @@
+{
+  "name": "locks-tests",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest --runInBand",
+    "test:watch": "jest --watchAll"
+  },
+  "devDependencies": {
+    "jest": "^29.6.0",
+    "pg": "^8.11.0"
+  }
+}
