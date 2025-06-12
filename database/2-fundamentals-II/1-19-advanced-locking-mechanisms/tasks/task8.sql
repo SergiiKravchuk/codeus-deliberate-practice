@@ -8,5 +8,6 @@
 
 BEGIN;
 -- Рішення
-
+SELECT * FROM loans WHERE id IN (1,2) ORDER BY id FOR UPDATE;
+UPDATE loans SET interest_rate = interest_rate * 1.05 WHERE id IN (1,2);
 -- Увага: не виконуйте COMMIT, щоб транзакції залишались заблокованими

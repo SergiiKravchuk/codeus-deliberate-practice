@@ -7,3 +7,4 @@
 -- пропускає вже заблоковані рядки (наприклад, іншими сесіями).
 
 -- Рішення
+SELECT * FROM transactions WHERE status = 'pending' FOR UPDATE SKIP LOCKED LIMIT 1;

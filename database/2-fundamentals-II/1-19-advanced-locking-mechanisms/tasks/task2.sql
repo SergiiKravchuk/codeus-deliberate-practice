@@ -6,5 +6,6 @@
 
 BEGIN;
 -- Рішення
-
+SELECT * FROM accounts WHERE id = 1 FOR UPDATE;
+UPDATE accounts SET balance = balance + 50 WHERE id = 1;
 -- Увага: не виконуйте COMMIT, щоб транзакції залишались заблокованими

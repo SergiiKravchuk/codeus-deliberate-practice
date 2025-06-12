@@ -7,3 +7,8 @@
 -- Обрати 5 транзакцій зі статусом 'pending' для обробки, пропускаючи ті, які вже обробляються іншими процесами
 
 -- Рішення
+SELECT *
+FROM transactions
+WHERE status = 'pending'
+FOR UPDATE SKIP LOCKED
+LIMIT 5;

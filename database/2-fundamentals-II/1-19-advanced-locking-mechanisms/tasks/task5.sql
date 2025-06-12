@@ -10,5 +10,7 @@
 
 BEGIN;
 -- Рішення
-
+SELECT * FROM accounts WHERE id IN (10, 20) ORDER BY id FOR UPDATE;
+UPDATE accounts SET balance = balance - 500 WHERE id = 10 AND balance >= 500;
+UPDATE accounts SET balance = balance + 500 WHERE id = 20;
 -- Увага: не виконуйте COMMIT, щоб транзакції залишались заблокованими

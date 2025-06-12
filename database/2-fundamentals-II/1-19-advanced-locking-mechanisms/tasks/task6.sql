@@ -8,5 +8,6 @@
 
 BEGIN;
 -- Рішення
-
+SELECT * FROM transactions WHERE id = 1 FOR UPDATE;
+UPDATE transactions SET status = 'completed' WHERE id = 1;
 -- Увага: не виконуйте COMMIT, щоб транзакції залишались заблокованими

@@ -8,5 +8,5 @@
 
 BEGIN;
 -- Рішення
-
+SELECT * FROM accounts WHERE id = 2 FOR UPDATE NOWAIT;
 -- Увага: не виконуйте COMMIT, щоб транзакції залишались заблокованими

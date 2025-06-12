@@ -7,5 +7,5 @@
 
 BEGIN;
 -- Рішення
-
+LOCK TABLE accounts IN ACCESS EXCLUSIVE MODE;
 -- Увага: не виконуйте COMMIT, щоб транзакції залишались заблокованими
