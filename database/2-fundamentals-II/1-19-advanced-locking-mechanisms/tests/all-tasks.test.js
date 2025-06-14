@@ -89,49 +89,62 @@ describe("All tests:", () => {
     await client2.query("ROLLBACK");
   }, 20000);
 
-
-  test("Task 5: Concurrent transfer is blocked by row-level locks", async () => {
+  test("Task 5: Only SELECT FOR UPDATE блокує конкурентний UPDATE", async () => {
     await client1.query("UPDATE accounts SET balance = 1000 WHERE id = 10");
     await client1.query("UPDATE accounts SET balance = 1000 WHERE id = 20");
+
+    await client1.query("BEGIN;");
     const sql = readFileSync(path.join("/tasks", "task5.sql"), "utf8");
-    await client1.query(sql);
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const selectQuery = sql.split(";")[0] + ";";
+    await client1.query(selectQuery);
 
-    const transferPromise = client2
-      .query(`
-        BEGIN;
-        SELECT * FROM accounts WHERE id IN (10, 20) ORDER BY id FOR UPDATE;
-        UPDATE accounts SET balance = balance - 500 WHERE id = 10 AND balance >= 500;
-        UPDATE accounts SET balance = balance + 500 WHERE id = 20;
-      `)
-      .then(() => "success")
-      .catch(() => "error");
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-    const result = await Promise.race([
-      transferPromise,
-      new Promise((resolve) => setTimeout(() => resolve("blocked"), 2000)),
-    ]);
-    expect(result).toBe("blocked");
-  }, 20000);
+    const updatePromise = client2.query(`
+      BEGIN;
+      UPDATE accounts SET balance = 500 WHERE id = 10;
+      COMMIT;
+    `).then(() => "completed").catch(() => "error");
 
-  test("Task 6: Row-level lock for safe transaction status update", async () => {
-    const sql = readFileSync(path.join("/tasks", "task6.sql"), "utf8");
-    await client1.query(sql);
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const updatePromise = client2
-      .query("UPDATE transactions SET status = 'failed' WHERE id = 1")
-      .then(() => "success")
-      .catch(() => "error");
-
-    const result = await Promise.race([
+    const updateResult = await Promise.race([
       updatePromise,
-      new Promise((resolve) => setTimeout(() => resolve("blocked"), 2000)),
+      new Promise(resolve => setTimeout(() => resolve("blocked"), 1500))
     ]);
 
-    expect(result).toBe("blocked");
+    await client1.query("ROLLBACK;");
+
+    expect(updateResult).toBe("blocked");
+  }, 10000);
+
+  test("Task 6: Advisory lock blocks concurrent update", async () => {
+      const fileContent = readFileSync(path.join("/tasks", "task6.sql"), "utf8");
+
+      await client1.query(fileContent);
+
+      const lockResult = await client1.query(
+        `SELECT COUNT(*) AS cnt FROM pg_locks 
+        WHERE locktype = 'advisory' AND classid = 0 AND objid = 12345`
+      );
+      expect(Number(lockResult.rows[0].cnt)).toBeGreaterThan(0);
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const updatePromise = client2.query(`
+        BEGIN;
+        SELECT pg_advisory_lock(12345);
+        UPDATE accounts SET balance = balance + 25 WHERE id = 1;
+        COMMIT;
+      `)
+        .then(() => "success")
+        .catch(() => "error");
+
+      const result = await Promise.race([
+        updatePromise,
+        new Promise((resolve) => setTimeout(() => resolve("blocked"), 2000)),
+      ]);
+
+      expect(result).toBe("blocked");
   }, 10000);
 
   test("Task 7: SKIP LOCKED for concurrent transaction processing", async () => {
@@ -155,30 +168,5 @@ describe("All tests:", () => {
 
     await client1.query("ROLLBACK");
     await client2.query("ROLLBACK");
-  }, 10000);
-
-  test("Task 8: No deadlock occurs when locking loans in the same order", async () => {
-    await client1.query("UPDATE loans SET interest_rate = 5.5 WHERE id = 1");
-    await client1.query("UPDATE loans SET interest_rate = 4.5 WHERE id = 2");
-    const sql = readFileSync(path.join("/tasks", "task8.sql"), "utf8");
-    await client1.query(sql);
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const updatePromise = client2
-      .query(`
-        BEGIN;
-        SELECT * FROM loans WHERE id IN (1,2) ORDER BY id FOR UPDATE;
-        UPDATE loans SET interest_rate = interest_rate * 1.05 WHERE id IN (1,2);
-      `)
-      .then(() => "success")
-      .catch(e => (e.code === "40P01" ? "deadlock" : "error"));
-
-    const result = await Promise.race([
-      updatePromise,
-      new Promise((resolve) => setTimeout(() => resolve("blocked"), 2000)),
-    ]);
-
-    expect(result).toBe("blocked");
   }, 10000);
 });
