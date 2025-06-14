@@ -8,9 +8,7 @@
 -- Заблокуйте рахунки з id=10 та id=20 для оновлення, зменшіть баланс на рахунку 10 (якщо достатньо коштів), і збільште на рахунку 20
 
 
-BEGIN;
--- Рішення
-SELECT * FROM accounts WHERE id IN (10, 20) ORDER BY id FOR UPDATE;
+SELECT * FROM accounts WHERE id IN (10, 20) ORDER BY id;
 UPDATE accounts SET balance = balance - 500 WHERE id = 10 AND balance >= 500;
 UPDATE accounts SET balance = balance + 500 WHERE id = 20;
 -- Увага: не виконуйте COMMIT, щоб транзакції залишались заблокованими
