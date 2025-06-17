@@ -21,7 +21,7 @@ Tests: [SqlQueriesTest](src/test/java/org/codeus/fundamentals/vaccum/SqlQueriesT
 
 ### Learning Resources
 
-Presentation: [sql-vacuum.pdf](sql-vacuum.pdf) - Contains detailed explanations of VACUUM concepts and best practices
+Presentation: [sql-vacuum.pdf](PostgreSQL-vacuum.pdf) - Contains detailed explanations of VACUUM concepts and best practices
 
 ## Tasks Overview
 
