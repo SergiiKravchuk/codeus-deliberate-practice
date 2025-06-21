@@ -36,8 +36,7 @@ CREATE TABLE transactions_multilevel (
     account_id        INT NOT NULL,
     transaction_type  VARCHAR(20) NOT NULL,
     amount            DECIMAL(15,2) NOT NULL,
-    transaction_date  TIMESTAMP NOT NULL,
-    PRIMARY KEY (id, transaction_date, transaction_type)
+    transaction_date  TIMESTAMP NOT NULL
 ) PARTITION BY RANGE (transaction_date);
 
 -- ===================================================================================================
@@ -45,9 +44,6 @@ CREATE TABLE transactions_multilevel (
 -- Table name: transactions_2023
 -- ===================================================================================================
 
-CREATE TABLE transactions_2023 PARTITION OF transactions_multilevel
-    FOR VALUES FROM ('2023-01-01') TO ('2024-01-01')
-    PARTITION BY LIST (transaction_type);
 
 -- ===================================================================================================
 -- TODO STEP 4: Create LIST Subpartitions for transaction_type
@@ -55,11 +51,6 @@ CREATE TABLE transactions_2023 PARTITION OF transactions_multilevel
 -- - transactions_2023_withdrawal  for 'withdrawal'
 -- ===================================================================================================
 
-CREATE TABLE transactions_2023_deposit PARTITION OF transactions_2023
-    FOR VALUES IN ('deposit');
-
-CREATE TABLE transactions_2023_withdrawal PARTITION OF transactions_2023
-    FOR VALUES IN ('withdrawal');
 
 -- ===================================================================================================
 -- STEP 5: Insert Sample Row to Trigger Multi-Level Routing

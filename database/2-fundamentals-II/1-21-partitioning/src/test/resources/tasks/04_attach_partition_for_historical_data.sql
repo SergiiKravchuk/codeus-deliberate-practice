@@ -37,11 +37,9 @@ CREATE TABLE transactions_partitioned (
 
 -- ======================================================================================
 -- TODO STEP 3: Create Partition for Data Before 2022
--- Table name: transactions_before_2022 range ('2000-01-01' -> '2022-01-01')
+-- Table name: transactions_before_2022 , Range ('2000-01-01' -> '2022-01-01')
 -- ======================================================================================
 
-CREATE TABLE transactions_before_2022 PARTITION OF transactions_partitioned
-    FOR VALUES FROM ('2000-01-01') TO ('2022-01-01');
 
 -- ======================================================================================
 -- STEP 4: Verify Partitioning with Sample Insert

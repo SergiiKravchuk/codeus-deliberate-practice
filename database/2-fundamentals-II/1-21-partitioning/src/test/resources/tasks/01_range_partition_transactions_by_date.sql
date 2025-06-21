@@ -36,15 +36,6 @@ CREATE TABLE transactions_partitioned (
 --   transactions_2024_03 for Mar 2024
 -- ===================================================================================================
 
-CREATE TABLE transactions_2024_01 PARTITION OF transactions_partitioned
-    FOR VALUES FROM ('2024-01-01') TO ('2024-02-01');
-
-CREATE TABLE transactions_2024_02 PARTITION OF transactions_partitioned
-    FOR VALUES FROM ('2024-02-01') TO ('2024-03-01');
-
-CREATE TABLE transactions_2024_03 PARTITION OF transactions_partitioned
-    FOR VALUES FROM ('2024-03-01') TO ('2024-04-01');
-
 -- ===================================================================================================
 -- STEP 3: Verify that data lands in correct partition
 -- ===================================================================================================

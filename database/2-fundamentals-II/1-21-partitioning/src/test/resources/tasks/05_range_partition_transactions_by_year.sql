@@ -42,8 +42,7 @@ CREATE TABLE transactions_partitioned (
     transaction_type  VARCHAR(20) NOT NULL,
     amount            DECIMAL(15,2) NOT NULL,
     transaction_date  TIMESTAMP NOT NULL,
-    target_account_id INT,
-    PRIMARY KEY (id, transaction_date)
+    target_account_id INT
 ) PARTITION BY RANGE (transaction_date);
 
 -- ===================================================================================================
@@ -51,14 +50,6 @@ CREATE TABLE transactions_partitioned (
 -- Table name pattern: transactions_{year} ({value} - value placeholder)
 -- ===================================================================================================
 
-CREATE TABLE transactions_2022 PARTITION OF transactions_partitioned
-    FOR VALUES FROM ('2022-01-01') TO ('2023-01-01');
-
-CREATE TABLE transactions_2023 PARTITION OF transactions_partitioned
-    FOR VALUES FROM ('2023-01-01') TO ('2024-01-01');
-
-CREATE TABLE transactions_2024 PARTITION OF transactions_partitioned
-    FOR VALUES FROM ('2024-01-01') TO ('2025-01-01');
 
 -- ===================================================================================================
 -- STEP 4: Insert and Validate

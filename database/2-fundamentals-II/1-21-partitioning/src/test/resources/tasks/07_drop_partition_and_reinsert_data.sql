@@ -49,14 +49,6 @@ CREATE TABLE transactions_partitioned (
 -- Table name pattern: transactions_{year} ({value} - value placeholder)
 -- ===================================================================================================
 
-CREATE TABLE transactions_2022 PARTITION OF transactions_partitioned
-    FOR VALUES FROM ('2022-01-01') TO ('2023-01-01');
-
-CREATE TABLE transactions_2023 PARTITION OF transactions_partitioned
-    FOR VALUES FROM ('2023-01-01') TO ('2024-01-01');
-
-CREATE TABLE transactions_2024 PARTITION OF transactions_partitioned
-    FOR VALUES FROM ('2024-01-01') TO ('2025-01-01');
 
 -- ===================================================================================================
 -- STEP 4: Insert Sample Data into 2023 Partition
@@ -70,12 +62,10 @@ VALUES (100, 'withdrawal', 150.00, '2023-06-15');
 -- ===================================================================================================
 
 -- TODO Copy data to backup table (table name: transactions_2023_copy):
-CREATE TABLE transactions_2023_copy AS
- SELECT * FROM transactions_2023;
+
 
 -- TODO Detach partition from main table (becomes standalone)
-ALTER TABLE transactions_partitioned
-    DETACH PARTITION transactions_2023;
+
 
 -- TODO Drop the now-detached partition
-DROP TABLE transactions_2023;
+

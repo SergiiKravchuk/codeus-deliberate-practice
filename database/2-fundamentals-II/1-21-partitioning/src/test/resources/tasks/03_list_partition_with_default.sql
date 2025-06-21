@@ -38,20 +38,15 @@ CREATE TABLE accounts_partitioned (
 
 -- ===================================================================================================
 -- TODO STEP 3: Create Known Partitions (checking_accounts and savings_accounts)
+-- - checking_accounts
+-- - savings_accounts
 -- ===================================================================================================
 
-CREATE TABLE checking_accounts PARTITION OF accounts_partitioned
-    FOR VALUES IN ('checking');
-
-CREATE TABLE savings_accounts PARTITION OF accounts_partitioned
-    FOR VALUES IN ('savings');
 
 -- ===================================================================================================
 -- TODO STEP 4: Add Default Partition (name: default_accounts)
 -- ===================================================================================================
 
-CREATE TABLE default_accounts PARTITION OF accounts_partitioned
-    DEFAULT;
 
 -- ===================================================================================================
 -- STEP 5: Insert a Row with an Unexpected Account Type

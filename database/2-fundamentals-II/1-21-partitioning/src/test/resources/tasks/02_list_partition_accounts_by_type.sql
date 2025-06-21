@@ -28,19 +28,15 @@ CREATE TABLE accounts_partitioned (
     customer_id  INT NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
     account_type VARCHAR(20) NOT NULL CHECK (account_type IN ('checking', 'savings')),
     balance      DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id, account_type)
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) PARTITION BY LIST (account_type);
 
 -- ===================================================================================================
 -- TODO STEP 3: Create Partitions
+-- - checking_accounts
+-- - savings_accounts
 -- ===================================================================================================
 
-CREATE TABLE checking_accounts PARTITION OF accounts_partitioned
-    FOR VALUES IN ('checking');
-
-CREATE TABLE savings_accounts PARTITION OF accounts_partitioned
-    FOR VALUES IN ('savings');
 
 -- ===================================================================================================
 -- STEP 4: Verify Partitioning with Sample Inserts

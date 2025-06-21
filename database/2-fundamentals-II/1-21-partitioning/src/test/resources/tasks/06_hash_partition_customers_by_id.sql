@@ -49,17 +49,6 @@ CREATE TABLE customers_partitioned (
 -- example: customers_part_0 where {modulus remainder} -> 4 % 4 = 0
 -- ===================================================================================================
 
-CREATE TABLE customers_part_0 PARTITION OF customers_partitioned
-    FOR VALUES WITH (MODULUS 4, REMAINDER 0);
-
-CREATE TABLE customers_part_1 PARTITION OF customers_partitioned
-    FOR VALUES WITH (MODULUS 4, REMAINDER 1);
-
-CREATE TABLE customers_part_2 PARTITION OF customers_partitioned
-    FOR VALUES WITH (MODULUS 4, REMAINDER 2);
-
-CREATE TABLE customers_part_3 PARTITION OF customers_partitioned
-    FOR VALUES WITH (MODULUS 4, REMAINDER 3);
 
 -- ===================================================================================================
 -- STEP 4: Insert a Sample Row for Verification
