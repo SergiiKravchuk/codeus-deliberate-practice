@@ -1,17 +1,17 @@
 ------------------------------------------------------------------------
 -- Populate Customers table
 ------------------------------------------------------------------------
-INSERT INTO customers (first_name, last_name, email, phone, address)
-VALUES ('John', 'Doe', 'john.doe@example.com', '1234567890', '123 Main St'),
-       ('Jane', 'Smith', 'jane.smith@example.com', '2345678901', '456 Oak St'),
-       ('Alice', 'Brown', 'alice.brown@example.com', '3456789012', '789 Pine St'),
-       ('Bob', 'Johnson', 'bob.johnson@example.com', '4567890123', '101 Maple St'),
-       ('Charlie', 'Davis', 'charlie.davis@example.com', '5678901234', '202 Cedar St'),
-       ('Emma', 'Wilson', 'emma.wilson@example.com', '6789012345', '303 Birch St'),
-       ('Liam', 'Anderson', 'liam.anderson@example.com', '7890123456', '404 Walnut St'),
-       ('Olivia', 'Martinez', 'olivia.martinez@example.com', '8901234567', '505 Cherry St'),
-       ('Mason', 'Clark', 'mason.clark@example.com', '9012345678', '606 Elm St'),
-       ('Sophia', 'Rodriguez', 'sophia.rodriguez@example.com', '0123456789', '707 Ash St');
+INSERT INTO customers (id, first_name, last_name, email, phone, address)
+VALUES (1, 'John', 'Doe', 'john.doe@example.com', '1234567890', '123 Main St'),
+       (2, 'Jane', 'Smith', 'jane.smith@example.com', '2345678901', '456 Oak St'),
+       (3, 'Alice', 'Brown', 'alice.brown@example.com', '3456789012', '789 Pine St'),
+       (4, 'Bob', 'Johnson', 'bob.johnson@example.com', '4567890123', '101 Maple St'),
+       (5, 'Charlie', 'Davis', 'charlie.davis@example.com', '5678901234', '202 Cedar St'),
+       (6, 'Emma', 'Wilson', 'emma.wilson@example.com', '6789012345', '303 Birch St'),
+       (7, 'Liam', 'Anderson', 'liam.anderson@example.com', '7890123456', '404 Walnut St'),
+       (8, 'Olivia', 'Martinez', 'olivia.martinez@example.com', '8901234567', '505 Cherry St'),
+       (9, 'Mason', 'Clark', 'mason.clark@example.com', '9012345678', '606 Elm St'),
+       (10, 'Sophia', 'Rodriguez', 'sophia.rodriguez@example.com', '0123456789', '707 Ash St');
 
 ------------------------------------------------------------------------
 -- Populate Accounts table

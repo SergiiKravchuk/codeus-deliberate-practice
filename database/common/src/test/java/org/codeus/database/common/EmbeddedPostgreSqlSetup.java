@@ -85,8 +85,10 @@ public abstract class EmbeddedPostgreSqlSetup {
           statement.execute(query);
         }
       }
+      connection.commit();
     } catch (SQLException e) {
       connection.rollback();
+      throw e;
     }
   }
 
