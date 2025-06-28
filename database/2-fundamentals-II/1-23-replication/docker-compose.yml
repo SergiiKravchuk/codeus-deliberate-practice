@@ -1,0 +1,82 @@
+services:
+  postgres-master:
+    image: postgres:17-alpine
+    container_name: pg-master
+    environment:
+      POSTGRES_DB: replication_lab
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--auth-host=md5 --auth-local=trust"
+    ports:
+      - "5435:5432"
+    volumes:
+      - ./src/test/resources/init-scripts/01-setup-master.sql:/docker-entrypoint-initdb.d/01-setup-master.sql
+      - master_data:/var/lib/postgresql/data
+    command: |
+      postgres
+      -c wal_level=logical
+      -c max_wal_senders=6
+      -c wal_keep_size=64MB
+      -c listen_addresses='*'
+      -c max_replication_slots=3
+    networks:
+      - replication_net
+
+  postgres-streaming-slave:
+    image: postgres:17-alpine
+    container_name: pg-streaming-slave
+    environment:
+      PGUSER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5436:5432"
+    volumes:
+      - streaming_slave_data:/var/lib/postgresql/data
+    depends_on:
+      - postgres-master
+    entrypoint: |
+      bash -c "
+      echo 'Setting up streaming replication...'
+      
+      until pg_isready -h postgres-master -p 5432; do
+        echo 'Waiting for master...'
+        sleep 2
+      done
+      
+      PGPASSWORD=replicator_pass pg_basebackup -h postgres-master -D /var/lib/postgresql/data -U replicator -v -P
+      echo \"primary_conninfo = 'host=postgres-master port=5432 user=replicator password=replicator_pass'\" >> /var/lib/postgresql/data/postgresql.conf
+      echo \"default_transaction_read_only = on\" >> /var/lib/postgresql/data/postgresql.conf
+      touch /var/lib/postgresql/data/standby.signal
+      
+      chown -R postgres:postgres /var/lib/postgresql/data
+      chmod 700 /var/lib/postgresql/data
+      
+      exec gosu postgres postgres
+      "
+    networks:
+      - replication_net
+
+  postgres-logical-subscriber:
+    image: postgres:17-alpine
+    container_name: pg-logical-subscriber
+    environment:
+      POSTGRES_DB: replication_lab
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5437:5432"
+    volumes:
+      - ./src/test/resources/init-scripts/02-setup-subscriber.sql:/docker-entrypoint-initdb.d/02-setup-subscriber.sql
+      - logical_subscriber_data:/var/lib/postgresql/data
+    depends_on:
+      - postgres-master
+    networks:
+      - replication_net
+
+volumes:
+  master_data:
+  streaming_slave_data:
+  logical_subscriber_data:
+
+networks:
+  replication_net:
