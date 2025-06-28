@@ -6,6 +6,9 @@
 -- Create replication user for streaming replication
 CREATE USER replicator REPLICATION LOGIN PASSWORD 'replicator_pass';
 
+-- Add replication permissions to pg_hba.conf
+\! echo "host replication replicator 0.0.0.0/0 md5" >> /var/lib/postgresql/data/pg_hba.conf
+
 -- Reload configuration
 SELECT pg_reload_conf();
 
