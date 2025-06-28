@@ -3,8 +3,7 @@
 ## Objective
 Learn to configure logical replication, understand selective data synchronization, and explore the differences from streaming replication.
 
-## Duration
-**~ 25 minutes**
+## Duration: **~ 25 minutes**
 
 ## Learning Goals
 By the end of this exercise, you will:
@@ -143,7 +142,7 @@ ORDER BY table_name;
 
 **Expected Results:**
 - `users`: 1 record 
-- `orders`: 105 records (original 5 + 100 from load test)
+- `orders`: 0 records 
 - `products`: 0 records (not subscribed yet)
 
 **💡 Selective Replication:** Only subscribed tables received data. Products table remains empty because it's in a different publication.

@@ -4,6 +4,8 @@
 
 This practice provides hands-on experience with **PostgreSQL Replication** using a multi-container Docker environment. You will work with both **Streaming Replication** (physical) and **Logical Replication** to understand their differences, use cases, and practical implementation.
 
+## Total Time: ~70 minutes
+
 ## Architecture
 
 The practice consists of 3 PostgreSQL 17 containers:
@@ -178,7 +180,6 @@ Complete the exercises in order:
     - Compare both replication types
     - Analyze use cases
 
-**Total Time:** ~70 minutes
 
 ## Troubleshooting
 

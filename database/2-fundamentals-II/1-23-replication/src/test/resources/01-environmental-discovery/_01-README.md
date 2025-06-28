@@ -3,8 +3,7 @@
 ## Objective
 Learn to identify database roles and understand the current replication setup by exploring the multi-container PostgreSQL environment.
 
-## Duration
-**~ 15 minutes**
+## Duration: **~ 15 minutes**
 
 ## Learning Goals
 By the end of this exercise, you will:

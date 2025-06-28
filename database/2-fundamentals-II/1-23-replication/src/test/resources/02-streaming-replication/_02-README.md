@@ -3,8 +3,7 @@
 ## Objective
 Master streaming replication monitoring, lag measurement, and performance testing in a production-like environment.
 
-## Duration
-**~ 15 minutes**
+## Duration: **~ 15 minutes**
 
 ## Learning Goals
 By the end of this exercise, you will:

@@ -3,8 +3,7 @@
 ## Objective
 Quick comparison of streaming vs logical replication to understand when to use each approach.
 
-## Duration
-**10 minutes**
+## Duration: **10 minutes**
 
 ## Learning Goals
 - ✅ Compare both replication types side-by-side
