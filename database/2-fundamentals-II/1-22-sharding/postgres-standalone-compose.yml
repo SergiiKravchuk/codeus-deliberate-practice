@@ -1,0 +1,26 @@
+services:
+  postgres-master:
+    image: postgres:17-alpine
+    container_name: standalone-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--auth-host=md5 --auth-local=trust"
+    ports:
+      - "5436:5432"
+    volumes:
+      - ./src/test/resources/init/table_and_data_setup.sql:/docker-entrypoint-initdb.d/postgres_setup.sql
+      - standalone_postgres_data:/var/lib/postgresql/data
+    command: |
+      postgres
+      -c wal_level=logical
+      -c listen_addresses='*'
+      -c max_replication_slots=3
+    networks:
+      - standalone_postgres_net
+
+volumes:
+  standalone_postgres_data:
+
+networks:
+  standalone_postgres_net:

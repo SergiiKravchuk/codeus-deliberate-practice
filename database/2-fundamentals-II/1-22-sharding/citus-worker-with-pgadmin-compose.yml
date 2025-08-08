@@ -1,0 +1,35 @@
+services:
+
+  worker:
+    image: citusdata/citus:13.0
+    container_name: citus_worker
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - citus_worker_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--auth-host=trust --auth-local=trust"
+    command: |
+      postgres
+      -c wal_level=logical
+      -c listen_addresses='*'
+      -c hba_file=/etc/postgresql/pg_hba.conf
+
+  worker_pgadmin:
+    image: dpage/pgadmin4
+    container_name: worker_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: worker@codeus.com
+      PGADMIN_DEFAULT_PASSWORD: worker
+    ports:
+      - "5435:80"
+    depends_on:
+      - worker
+
+
+volumes:
+  citus_worker_data:

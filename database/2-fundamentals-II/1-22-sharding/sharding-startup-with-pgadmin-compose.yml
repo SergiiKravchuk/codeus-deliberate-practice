@@ -1,0 +1,77 @@
+services:
+  coordinator:
+    image: citusdata/citus:13.0
+    container_name: citus_coordinator
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - ./src/test/resources/init/table_and_data_setup.sql:/docker-entrypoint-initdb.d/setup_coordinator.sql
+      - citus_coord_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--auth-host=trust --auth-local=trust"
+    command: |
+      postgres
+      -c wal_level=logical
+      -c listen_addresses='*'
+      -c hba_file=/etc/postgresql/pg_hba.conf
+    networks:
+      - citus_net
+
+  postgres-master:
+    image: postgres:17-alpine
+    container_name: standalone-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--auth-host=md5 --auth-local=trust"
+    ports:
+      - "5436:5432"
+    volumes:
+      - ./src/test/resources/init/table_and_data_setup.sql:/docker-entrypoint-initdb.d/postgres_setup.sql
+      - standalone_postgres_data:/var/lib/postgresql/data
+    command: |
+      postgres
+      -c wal_level=logical
+      -c listen_addresses='*'
+      -c max_replication_slots=3
+    networks:
+      - standalone_postgres_net
+
+  coordinator_pgadmin:
+    image: dpage/pgadmin4
+    container_name: coordinator_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: coordinator@codeus.com
+      PGADMIN_DEFAULT_PASSWORD: coordinator
+    ports:
+      - "5433:80"
+    depends_on:
+      - coordinator
+    networks:
+      - citus_net
+
+  postgres_pgadmin:
+    image: dpage/pgadmin4
+    container_name: postgres_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: postgres@codeus.com
+      PGADMIN_DEFAULT_PASSWORD: postgres
+    ports:
+      - "5437:80"
+    depends_on:
+      - postgres-master
+    networks:
+      - standalone_postgres_net
+
+volumes:
+  citus_coord_data:
+  standalone_postgres_data:
+
+networks:
+  citus_net:
+  standalone_postgres_net:
