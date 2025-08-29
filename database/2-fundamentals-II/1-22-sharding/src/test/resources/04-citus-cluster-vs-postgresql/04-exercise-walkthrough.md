@@ -2,7 +2,7 @@
 
 ## Prerequisites:
 - [Exercise 3](..%2F03-single-node-citus-w-dist-tables-vs-postgresql%2F03-exercise-walkthrough.md) is completed.
-- PostgreSQL (port 5435) and Citus (port 5432) nodes are operational.
+- PostgreSQL (port 5436) and Citus (port 5432) nodes are operational.
 
 ---
 
